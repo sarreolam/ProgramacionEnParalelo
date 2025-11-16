@@ -1,5 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import Agents.Employee;
+import Agents.Client;
+import Buffers.Counter;
+
 public class VentanaPrincipal extends JFrame{
     private JTextField numClientes = new JTextField();
     private JTextField numDriveThrough = new JTextField();
@@ -40,13 +44,8 @@ public class VentanaPrincipal extends JFrame{
 
         inicializarBtn.addActionListener(e -> {
             try {
-                int clientes = Integer.parseInt(numClientes.getText());
-                int drive = Integer.parseInt(numDriveThrough.getText());
-                int empleados = Integer.parseInt(numEmpleados.getText());
-                int maquinas = Integer.parseInt(numMaquinas.getText());
 
-                //inicializar ventanas de cliente empleado
-
+                InicializarAgentes();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Ingresa solo números válidos",
@@ -54,5 +53,30 @@ public class VentanaPrincipal extends JFrame{
                         JOptionPane.ERROR_MESSAGE);
             }
         });
+    }
+
+    public void InicializarAgentes(){
+        int numClients = Integer.parseInt(numClientes.getText());
+        int drive = Integer.parseInt(numDriveThrough.getText());
+        int numEmployees = Integer.parseInt(numEmpleados.getText());
+        int maquinas = Integer.parseInt(numMaquinas.getText());
+
+        //inicializar ventanas de cliente empleado
+        Employee[] employees = new Employee[numEmployees];
+        Client[] clients = new Client[numClients];
+        Counter counter = new Counter(0);
+
+        for (int i = 0; i < numEmployees; i++) {
+            Employee employee = new Employee("Employee number " + (i+1), counter);
+            employees[i] = employee;
+            employees[i].start();
+        }
+
+        for (int i = 0; i < numClients; i++) {
+            Client client = new Client("Client number " + (i+1), counter);
+            clients[i] = client;
+            clients[i].start();
+        }
+
     }
 }

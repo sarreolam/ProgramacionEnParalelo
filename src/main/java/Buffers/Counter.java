@@ -12,6 +12,10 @@ public class Counter {
     private Lock makeOrderLock = new ReentrantLock();
     private Queue<Integer> orderQueue = new LinkedList<>();
 
+    public Counter(int idCounter){
+        this.idCounter = idCounter;
+    }
+
     public int GetOrder(){
         try{
             getOrderLock.lock();
@@ -19,6 +23,7 @@ public class Counter {
             return orderQueue.poll();
         } catch (Exception e){
             System.out.println(e);
+            return -1;
         } finally {
             getOrderLock.unlock();
         }
