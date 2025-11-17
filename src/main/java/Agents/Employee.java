@@ -4,57 +4,74 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Buffers.Counter;
+import Buffers.Kitchen;
 
 
-public class Employee extends Thread{
-
-    private String name;
-    private Counter counter;
-    private int orderToMake;
-    private final Lock kitchenLock;
+public class Employee extends Thread {
+    private final String name;
+    private final Counter counter;
+    private final Kitchen kitchen;
     private boolean isRunning = true;
 
-    public Employee (String name, Counter counter, Lock kitchenLock) {
+    public enum EstadoEmpleado { NACIENDO, CAMINANDO_AL_MOSTRADOR, CAMINANDO_A_MAQUINA, ESPERANDO, ATENDIENDO, SALIENDO, FUERA, PREPARANDO }
+    private EstadoEmpleado state;
+
+    public Employee(String name, Counter counter, Kitchen kitchen) {
         this.name = name;
         this.counter = counter;
-        this.kitchenLock = kitchenLock;
-    }
-
-    public void Decision() {
-        Random rand = new Random();
-        int choice = rand.nextInt(101);
-        try{
-            if(choice <= 30) {
-                System.out.println("Agent has chosen to go to the counter.");
-                counter.GetOrder();
-                for (int i = 0; i < 1_000_000; i++) {} //Segun yo esto iba a hacer que se viera el runnable pero no se ve en la tabla
-                System.out.println("Order number: " + orderToMake);
-            } else if(choice >= 50 && choice <= 70) {
-                System.out.println("Agent has chosen to go to the kitchen.");
-                synchronized (kitchenLock) { //Esto se supone que muestra el blocked pero ñao ñao
-                    System.out.println(getName() + " entered the kitchen (RUNNABLE inside sync).");
-                    Thread.sleep(3000);
-                }
-            } else if(choice >= 80 && choice <= 99) { //Timed waiting
-                System.out.println("Agent has chosen to go to the store.");
-                Thread.sleep(5000);
-            } else if(choice >= 100) {
-                isRunning = false; //Terminated
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        this.kitchen = kitchen;
+        this.state = EstadoEmpleado.NACIENDO;
     }
 
     @Override
-    public void run(){
-        while(isRunning) {
-            try{
-                Decision();
-                Thread.sleep(3000);
-            } catch(Exception e){
-                System.out.println(e);
+    public void run() {
+        
+        System.out.println(name + " ha comenzado su turno.");
+        state = EstadoEmpleado.FUERA;
+
+        kitchen.entrarCocina(name);
+        while (isRunning) {
+            try {
+                if (counter.hayClientesEsperando()) {
+                    state = EstadoEmpleado.CAMINANDO_AL_MOSTRADOR;
+                    System.out.println(name + " va al counter a atender.");
+                    Thread.sleep(1000);
+                    state = EstadoEmpleado.ATENDIENDO;
+                    int pedidoId = counter.empleadoLlega(name);
+                    if (pedidoId != -1) {
+                        kitchen.agregarPedido(pedidoId);
+                    }
+                } else if (kitchen.hayPedidosEnEspera()) {
+                    Integer pedido = kitchen.tomarPedido();
+                    if (pedido != null) {
+                        state = EstadoEmpleado.CAMINANDO_A_MAQUINA;
+                        Machine maquina = kitchen.obtenerMaquinaLibre();
+                        if (maquina != null) {
+                            System.out.println(name + " prepara pedido #" + pedido + " usando " + maquina.getNombre());
+                            state = EstadoEmpleado.PREPARANDO;
+                            maquina.preparar(name);
+                            System.out.println(name + " terminó pedido #" + pedido);
+                            counter.entregarPedido(pedido, name);
+                        } else {
+                            System.out.println(name + " no encontró máquina libre.");
+                            Thread.sleep(1000);
+                        }
+
+                    }
+                } else {
+                    state = EstadoEmpleado.ESPERANDO;
+                    System.out.println(name + " no ve clientes ni pedidos, esperando...");
+                    Thread.sleep(1000);
+                }
+            } catch (InterruptedException e) {
+                isRunning = false;
+                kitchen.salirCocina(name);
+                System.out.println(name + " terminó su turno.");
             }
         }
     }
+    public EstadoEmpleado getEstado() {
+        return state;
+    }
+
 }

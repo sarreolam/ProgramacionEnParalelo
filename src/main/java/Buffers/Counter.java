@@ -1,47 +1,112 @@
 package Buffers;
+
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Counter {
-
-    public int MaxAmountClients = 5;
+    private final int capacidadMaxima;
+    private final Semaphore espaciosDisponibles;
+    private final Semaphore clientesEsperando;
+    private final Object mutex = new Object(); 
     private int idCounter = 0;
-    private Lock getOrderLock = new ReentrantLock();
-    private Lock makeOrderLock = new ReentrantLock();
-    private Queue<Integer> orderQueue = new LinkedList<>();
+    private final Queue<String> colaClientes = new LinkedList<>();
 
-    public Counter(int idCounter){
-        this.idCounter = idCounter;
+    private final Map<Integer, String> pedidosEnProceso = new HashMap<>();
+    private final Map<String, Boolean> pedidosListos = new HashMap<>();
+
+    public Counter() {
+        this.capacidadMaxima = 5;
+        this.espaciosDisponibles = new Semaphore(capacidadMaxima, true);
+        this.clientesEsperando = new Semaphore(0, true);
     }
 
-    public int GetOrder(){
-        try{
-            getOrderLock.lock();
-            System.out.println("Getting order from client");
-            return orderQueue.poll();
-        } catch (Exception e){
-            System.out.println(e);
+    public void clienteLlega(String nombreCliente)  {
+        System.out.println(nombreCliente + " camina hacia el counter...");
+
+        try {
+            espaciosDisponibles.acquire();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        synchronized (mutex) {
+            colaClientes.add(nombreCliente);
+            System.out.println(nombreCliente + " está esperando en el counter. [Clientes en fila: " + colaClientes.size() + "]");
+        }
+
+        clientesEsperando.release();
+
+        boolean atendido = false;
+        while (!atendido) {
+            synchronized (mutex) {
+                if (pedidosListos.getOrDefault(nombreCliente, false)) {
+                    atendido = true;
+                }
+            }
+            esperar(200);
+        }
+
+        System.out.println(nombreCliente + " fue atendido y deja el counter.");
+        espaciosDisponibles.release();
+    }
+
+    public int empleadoLlega(String nombreEmpleado) {
+         if (!clientesEsperando.tryAcquire()) {
             return -1;
-        } finally {
-            getOrderLock.unlock();
         }
+        String cliente;
+        synchronized (mutex) {
+            cliente = colaClientes.poll();
+        }
+        int pedidoId = -1;
 
+        if (cliente != null) {
+            System.out.println(nombreEmpleado + " atiende a " + cliente + ".");
+            esperar(2000);
+            pedidoId = registrarPedido(cliente);
+            System.out.println(nombreEmpleado + " terminó de atender a " + cliente + ".");
+        }
+        return pedidoId;
     }
+    public int registrarPedido(String cliente) {
+        synchronized (mutex) {
+            int pedidoId = idCounter++; 
+            pedidosEnProceso.put(pedidoId, cliente);
+            pedidosListos.put(cliente, false);
+            System.out.println("Se registró pedido #" + pedidoId + " para " + cliente);
+            return pedidoId;
+        }
+    }
+    public void entregarPedido(int pedidoId, String empleado) {
+    synchronized (mutex) {
+        String cliente = pedidosEnProceso.remove(pedidoId);
+        if (cliente != null) {
+            pedidosListos.put(cliente, true);
+            System.out.println("🍔 " + empleado + " entregó pedido #" + pedidoId + " a " + cliente);
+        }
+    }
+}
 
-    public void MakeOrder(){
+    public boolean hayClientesEsperando() {
+        return clientesEsperando.availablePermits() > 0;
+    }
+    
+    private void esperar(int t){
         try{
-            makeOrderLock.lock();
-            System.out.println("Making order by client");
-            orderQueue.add(idCounter);
-            System.out.println("Order made " + idCounter);
-            idCounter++;
-        } catch (Exception e){
-            System.out.println(e);
-        } finally {
-            makeOrderLock.unlock();
+            Thread.sleep(t);
+        }catch(InterruptedException e){
+            System.out.println(e);		
+        }
+	}
+    public int getClientesEnFila() {
+        synchronized (mutex) {
+            return colaClientes.size();
         }
     }
-
 }

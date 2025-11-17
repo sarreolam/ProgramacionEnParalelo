@@ -3,38 +3,38 @@ import java.util.Random;
 import Buffers.Counter;
 
 
-public class Client extends Thread{
-        private String name;
-        private Counter counter;
+public class Client extends Thread {
+    private final String name;
+    private final Counter counter;
 
-        public Client (String name, Counter counter){
-            this.name = name;
-            this.counter = counter;
-        }
+    public enum EstadoCliente { NACIENDO, CAMINANDO, ESPERANDO, PIDIENDO, SALIENDO, FUERA }
+    private EstadoCliente state;
 
-        public void Decision() {
-            Random rand = new Random();
-            int choice = rand.nextInt(30);
-            if(choice <= 30) {
-                System.out.println("Client has chosen to go to the counter to order.");
-                counter.MakeOrder();
-            } else if(choice >= 50 && choice <= 70) {
-                System.out.println("Agent has chosen to go to the kitchen.");
-            } else if(choice >= 80 && choice <= 100) {
-                System.out.println("Agent has chosen to go to the store.");
-            }
-        }
-
-        @Override
-        public void run(){
-            while(true){
-                try{
-                    Decision();
-                    Thread.sleep(3000);
-                } catch(Exception e){
-                    System.out.println(e);
-                }
-
-        }
+    public Client(String name, Counter counter) {
+        this.name = name;
+        this.counter = counter;
+        this.state = EstadoCliente.NACIENDO;
     }
+
+    @Override
+    public void run() {
+
+        state = EstadoCliente.CAMINANDO;
+        esperar(1000);
+        state = EstadoCliente.PIDIENDO;
+        counter.clienteLlega(name);
+        state = EstadoCliente.SALIENDO;
+        esperar(1000);
+        state = EstadoCliente.FUERA;
+        System.out.println(name + " salió del restaurante.");
+
+    }
+
+    private void esperar(int t){
+		try{
+			Thread.sleep(t);
+		}catch(InterruptedException e){
+			System.out.println(e);		
+		}
+	}
 }

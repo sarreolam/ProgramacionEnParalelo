@@ -4,8 +4,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Agents.Employee;
+import Agents.Machine;
 import Agents.Client;
+import Agents.DriveThru;
 import Buffers.Counter;
+import Buffers.Kitchen;
+import Buffers.Store;
 
 public class VentanaPrincipal extends JFrame{
     private JTextField numClientes = new JTextField();
@@ -63,16 +67,24 @@ public class VentanaPrincipal extends JFrame{
         int numClients = Integer.parseInt(numClientes.getText());
         int drive = Integer.parseInt(numDriveThrough.getText());
         int numEmployees = Integer.parseInt(numEmpleados.getText());
-        int maquinas = Integer.parseInt(numMaquinas.getText());
-        Lock kitchenLock = new ReentrantLock();
+        int numMachines = Integer.parseInt(numMaquinas.getText());
 
         //inicializar ventanas de cliente empleado
         Employee[] employees = new Employee[numEmployees];
         Client[] clients = new Client[numClients];
-        Counter counter = new Counter(0);
+        Counter counter = new Counter();
+        
+        Machine[] machines = new Machine[numMachines];
+        for (int i = 0; i < numMachines; i++) {
+            Machine m = new Machine("Machine"+i);
+            machines[i] = m;
+            machines[i].start();
+        }
+
+        Kitchen kitchen = new Kitchen(machines);
 
         for (int i = 0; i < numEmployees; i++) {
-            Employee employee = new Employee("Employee number " + (i+1), counter, kitchenLock);
+            Employee employee = new Employee("Employee number " + (i+1), counter, kitchen);
             employees[i] = employee;
             employees[i].start();
         }
@@ -83,9 +95,19 @@ public class VentanaPrincipal extends JFrame{
             clients[i].start();
         }
 
-        StateTable stateTable = new StateTable(clients, employees);
+        DriveThru[] driveThrus = new DriveThru[0]; // aún no implementado
+        GeneralTable generalTable = new GeneralTable(clients, employees, machines, driveThrus, counter, kitchen, new Store(10));
+        Thread generalThread = new Thread(generalTable);
+        generalThread.start();
+
+        StateTable stateTable = new StateTable(clients, employees, machines);
         Thread stateThread = new Thread(stateTable);
         stateThread.start();
+
+        EmployeeStateTable employeeStateTable = new EmployeeStateTable(employees);
+        Thread employeeStateThread = new Thread(employeeStateTable);
+        employeeStateThread.start();
+
 
     }
 }
