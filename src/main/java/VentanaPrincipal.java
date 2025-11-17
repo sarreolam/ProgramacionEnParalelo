@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import Agents.Employee;
 import Agents.Client;
 import Buffers.Counter;
@@ -10,6 +13,7 @@ public class VentanaPrincipal extends JFrame{
     private JTextField numEmpleados = new JTextField();
     private JTextField numMaquinas = new JTextField();
     private JButton inicializarBtn = new JButton("Inicializar");
+
 
     public VentanaPrincipal() {
         setTitle("Simulador McDonalds");
@@ -60,6 +64,7 @@ public class VentanaPrincipal extends JFrame{
         int drive = Integer.parseInt(numDriveThrough.getText());
         int numEmployees = Integer.parseInt(numEmpleados.getText());
         int maquinas = Integer.parseInt(numMaquinas.getText());
+        Lock kitchenLock = new ReentrantLock();
 
         //inicializar ventanas de cliente empleado
         Employee[] employees = new Employee[numEmployees];
@@ -67,7 +72,7 @@ public class VentanaPrincipal extends JFrame{
         Counter counter = new Counter(0);
 
         for (int i = 0; i < numEmployees; i++) {
-            Employee employee = new Employee("Employee number " + (i+1), counter);
+            Employee employee = new Employee("Employee number " + (i+1), counter, kitchenLock);
             employees[i] = employee;
             employees[i].start();
         }
@@ -77,6 +82,10 @@ public class VentanaPrincipal extends JFrame{
             clients[i] = client;
             clients[i].start();
         }
+
+        StateTable stateTable = new StateTable(clients, employees);
+        Thread stateThread = new Thread(stateTable);
+        stateThread.start();
 
     }
 }

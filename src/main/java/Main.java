@@ -2,10 +2,12 @@ import Agents.Employee;
 import Agents.Client;
 import Buffers.Counter;
 import java.util.Scanner;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Main {
     public static void main(String[] args) {
-
+        Lock kitchenLock = new ReentrantLock();
         Scanner scanner = new Scanner(System.in);
         System.out.println("1.- GUI 2.- console");
         int option = scanner.nextInt();
@@ -25,7 +27,7 @@ public class Main {
                 Counter counter = new Counter(0);
 
                 for (int i = 0; i < numEmployees; i++) {
-                    Employee employee = new Employee("Employee number " + (i + 1), counter);
+                    Employee employee = new Employee("Employee number " + (i + 1), counter, kitchenLock);
                     employees[i] = employee;
                     employees[i].start();
                 }
