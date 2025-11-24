@@ -73,7 +73,7 @@ public class VentanaPrincipal extends JFrame{
         Employee[] employees = new Employee[numEmployees];
         Client[] clients = new Client[numClients];
         Counter counter = new Counter();
-        
+
         Machine[] machines = new Machine[numMachines];
         for (int i = 0; i < numMachines; i++) {
             Machine m = new Machine("Machine"+i);
@@ -84,13 +84,13 @@ public class VentanaPrincipal extends JFrame{
         Kitchen kitchen = new Kitchen(machines);
 
         for (int i = 0; i < numEmployees; i++) {
-            Employee employee = new Employee("Employee number " + (i+1), counter, kitchen);
+            Employee employee = new Employee("Employee" + (i+1));
             employees[i] = employee;
             employees[i].start();
         }
 
         for (int i = 0; i < numClients; i++) {
-            Client client = new Client("Client number " + (i+1), counter);
+            Client client = new Client("Client" + (i+1));
             clients[i] = client;
             clients[i].start();
         }

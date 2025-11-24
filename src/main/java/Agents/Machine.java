@@ -99,4 +99,9 @@ public class Machine extends Thread {
         double x = Math.sin(System.nanoTime());
     }
   }
+
+    @Override
+    public String toString() {
+        return nombre + " - " + estado;
+    }
 }
