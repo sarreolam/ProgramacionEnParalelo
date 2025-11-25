@@ -51,6 +51,27 @@ public class Kitchen {
         }
         return null;
     }
+
+    public int getUsedMachines() {
+        int usedMachines = 0;
+        for(Machine m : machines) {
+            if(m.tryUse()) usedMachines++;
+        }
+        return usedMachines;
+    }
+
+    public int getUnusedMachines() {
+        int unusedMachines = 0;
+        for(Machine m : machines) {
+            if(m.tryUse()) unusedMachines++;
+        }
+        return unusedMachines;
+    }
+
+    public int getMachinesLength(){
+        return machines.length;
+    }
+
     public synchronized int getPedidosPendientes() {
         return pedidosPendientes.size();
     }
