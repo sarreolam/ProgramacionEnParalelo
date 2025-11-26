@@ -12,14 +12,14 @@ public class Kitchen {
     private final Machine[] machines;
     private int nextOrderId = 0;
 
-    public Kitchen( Machine[] machines) {
+    public Kitchen(Machine[] machines) {
         this.empleadosDentro = new Semaphore(5, true);
         this.machines = machines;
     }
 
     public synchronized void agregarPedido(int pedidoId) {
         pedidosPendientes.add(pedidoId);
-        System.out.println("📦 Pedido #" + pedidoId + " agregado a la cocina.");
+        System.out.println("📦 Pedido #" + pedidoId + " agregado a la cocina. Total pendientes: " + pedidosPendientes.size());
     }
 
     public synchronized boolean hayPedidosEnEspera() {
@@ -27,17 +27,20 @@ public class Kitchen {
     }
 
     public synchronized Integer tomarPedido() {
-        return pedidosPendientes.poll();
+        Integer pedido = pedidosPendientes.poll();
+        if (pedido != null) {
+            System.out.println("Pedido #" + pedido + " tomado de la cocina. Quedan: " + pedidosPendientes.size());
+        }
+        return pedido;
     }
-
 
     public void entrarCocina(String empleado){
         try {
-          empleadosDentro.acquire();
+            empleadosDentro.acquire();
+            System.out.println(empleado + " entra a la cocina.");
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        System.out.println(empleado + " entra a la cocina.");
     }
 
     public void salirCocina(String empleado) {
@@ -47,23 +50,33 @@ public class Kitchen {
 
     public Machine obtenerMaquinaLibre() {
         for (Machine m : machines) {
-            if (m.tryUse()) return m;
+            if (m.tryUse()) {
+                System.out.println(m.getNombre() + " asignada!");
+                return m;
+            }
         }
+        System.out.println("No hay maquinas disponibles");
         return null;
     }
 
+    //cambio el tryUse() hacia que se bloquearan todas la maquinas
     public int getUsedMachines() {
         int usedMachines = 0;
         for(Machine m : machines) {
-            if(m.tryUse()) usedMachines++;
+            if(m.getEstado() == Machine.EstadoMaquina.EN_USO) {
+                usedMachines++;
+            }
         }
         return usedMachines;
     }
 
+    //lo mismo
     public int getUnusedMachines() {
         int unusedMachines = 0;
         for(Machine m : machines) {
-            if(m.tryUse()) unusedMachines++;
+            if(m.getEstado() == Machine.EstadoMaquina.OPERATIVA) {
+                unusedMachines++;
+            }
         }
         return unusedMachines;
     }
@@ -76,4 +89,3 @@ public class Kitchen {
         return pedidosPendientes.size();
     }
 }
-

@@ -96,8 +96,18 @@ public class ClientHandler implements Runnable {
 
                     case "employeeGetMachine": {
                         System.out.println("=== Case: employeeGetMachine");
-                        var machine = kitchen.obtenerMaquinaLibre();
-                        out.println(machine != null ? machine.getNombre() : "none");
+                        Machine machine = kitchen.obtenerMaquinaLibre();
+
+                        if (machine != null) {
+                            System.out.println("✓ Máquina obtenida: " + machine.getNombre());
+                            //lamar a preparar par que la maquina libere el lock
+                            machine.preparar(name);
+                            System.out.println("Máquina " + machine.getNombre() + " terminó de preparar");
+                            out.println(machine.getNombre());
+                        } else {
+                            System.out.println("No hay máquinas disponibles");
+                            out.println("none");
+                        }
                         break;
                     }
 
@@ -106,6 +116,7 @@ public class ClientHandler implements Runnable {
                         if (parts.length >= 3) {
                             int id = Integer.parseInt(parts[parts.length - 1]);
                             counter.entregarPedido(id, name);
+                            System.out.println("Pedido #" + id + " entregado por " + name);
                             out.println("OK");
                         } else {
                             out.println("ERROR: Missing orderId");

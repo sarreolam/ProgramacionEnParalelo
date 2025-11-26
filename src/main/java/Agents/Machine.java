@@ -9,10 +9,9 @@ public class Machine extends Thread {
 
     private final String nombre;
     private EstadoMaquina estado;
-    private final Lock lock = new ReentrantLock(true); 
+    private final Lock lock = new ReentrantLock(true);
     private final Random random = new Random();
     private boolean isRunning = true;
-    private boolean action = false;
 
     public Machine(String nombre) {
         this.nombre = nombre;
@@ -23,57 +22,64 @@ public class Machine extends Thread {
         if (estado == EstadoMaquina.OPERATIVA && lock.tryLock()) {
             estado = EstadoMaquina.EN_USO;
             return true;
-        }else if(estado == EstadoMaquina.AVERIADA && lock.tryLock()){
-            estado = EstadoMaquina.REPARANDO;
-            return true;
         }
         return false;
     }
 
     public void preparar(String empleado){
-        action = true;
-        while (action) {
-          runFor(200);
-        }
-        if (random.nextInt(10) < 2) {
-          estado = EstadoMaquina.AVERIADA;
-        }else{
-          estado = EstadoMaquina.OPERATIVA;
-        }
-        liberar();
 
+        try {
+            // Simular trabajo de preparación
+            runFor(2000);
+
+            // Probabilidad de avería (20%)
+            if (random.nextInt(10) < 2) {
+                estado = EstadoMaquina.AVERIADA;
+            } else {
+                estado = EstadoMaquina.OPERATIVA;
+            }
+
+        } finally {
+            liberar();
+        }
     }
 
     public void liberar() {
-        lock.unlock();
+            lock.unlock();
+
     }
 
     @Override
     public void run() {
         while (isRunning) {
-          switch (estado) {
-              case OPERATIVA:
+            switch (estado) {
+                case OPERATIVA:
+                    // Esperando a ser usada
+                    break;
 
-                  break;
-              case AVERIADA:
+                case AVERIADA:
+                    // Intentar auto-reparación
+                    if (lock.tryLock()) {
+                        try {
+                            estado = EstadoMaquina.REPARANDO;
+                            runFor(3000);
+                            estado = EstadoMaquina.OPERATIVA;
+                            System.out.println( nombre + " reparada - vuelve a OPERATIVA");
+                        } finally {
+                            lock.unlock();
+                        }
+                    }
+                    break;
 
+                case EN_USO:
+                    // Siendo usada por un empleado
+                    break;
 
-                  break;
-                  
-              case EN_USO:
-                  if(action){
-                    runFor(1000);
-                  }
-                  action = false;
-                  break;
-              case REPARANDO:
-                  if(action){
-                    runFor(3000);
-                    estado = EstadoMaquina.EN_USO;
-                  }
-                  break;
-          }
-          esperar(1000);
+                case REPARANDO:
+                    // En proceso de reparación
+                    break;
+            }
+            esperar(1000);
         }
     }
 
@@ -85,20 +91,21 @@ public class Machine extends Thread {
         return nombre;
     }
 
-  private void esperar(int t){
-		try{
-			Thread.sleep(t);
-		}catch(InterruptedException e){
-			System.out.println(e);		
-		}
-	}
-  private void runFor(long millis) {
-    long start = System.currentTimeMillis();
-    while (System.currentTimeMillis() - start < millis) {
-        // Mantente ocupado (RUNNING)
-        double x = Math.sin(System.nanoTime());
+    private void esperar(int t){
+        try{
+            Thread.sleep(t);
+        }catch(InterruptedException e){
+            System.out.println(e);
+        }
     }
-  }
+
+    private void runFor(long millis) {
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < millis) {
+            // Mantente ocupado (simulando trabajo)
+            double x = Math.sin(System.nanoTime());
+        }
+    }
 
     @Override
     public String toString() {
