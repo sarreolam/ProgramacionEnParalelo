@@ -5,12 +5,15 @@ import Agents.Client;
 import Buffers.Counter;
 import Buffers.Kitchen;
 
+import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        /*Scanner scanner = new Scanner(System.in);
         System.out.println("1.- GUI 2.- console");
         int option = scanner.nextInt();
         switch (option) {
@@ -49,6 +52,22 @@ public class Main {
                 default:
                     System.out.println("Invalid option. Closing program");
                     break;
-        }
+        }*/
+        JFrame f = new JFrame("Test Animation");
+        JTextArea t = new JTextArea();
+        Semaphore s = new Semaphore(1);
+
+        ArrayList<Client> clients = new ArrayList<>();
+        Client c = new Client("Test");
+        clients.add(c);
+        c.start();
+
+        StoreVisual sv = new StoreVisual(t, s, clients);
+        sv.setSize(800, 600);
+
+        f.add(sv);
+        f.setSize(800,600);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setVisible(true);
     }
 }
