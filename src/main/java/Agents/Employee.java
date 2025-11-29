@@ -212,8 +212,9 @@ public class Employee extends Thread {
                                     Thread.sleep(50);
                                 }
 
-                                System.out.println(name + " terminó de preparar pedido #" + takenOrder);
-
+                                state = EmployeeState.PREPARANDO;
+                                System.out.println(name + " prepara pedido #" + pedidoId + " usando " + machineName);
+                                Thread.sleep(2000);
                                 out.println("employeeDeliverOrder " + name + " " + takenOrder);
                                 in.readLine();
 
@@ -260,8 +261,9 @@ public class Employee extends Thread {
                                     Thread.sleep(50);
                                 }
 
-                                System.out.println(name + " terminó de preparar pedido #" + pedidoId);
-
+                                state = EmployeeState.PREPARANDO;
+                                System.out.println(name + " prepara pedido #" + pedidoId + " usando " + machineName);
+                                Thread.sleep(2000);
                                 out.println("employeeDeliverOrder " + name + " " + pedidoId);
                                 in.readLine();
 
