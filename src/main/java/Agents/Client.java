@@ -100,6 +100,8 @@ public class Client extends Thread {
     }
 
     public void UpdateAnimationArray() {
+        BufferedImage[] previousAnim = currentAnim;
+
         switch (state) {
             case CAMINANDO:
                 currentAnim = walkAnim;
@@ -115,16 +117,23 @@ public class Client extends Thread {
                 currentAnim = idleAnim;
                 break;
         }
+
+        if (previousAnim != currentAnim) {
+            frameIndex = 0;
+        }
     }
 
     public BufferedImage getCurrentSprite() {
-        if (currentAnim == null) return null;
+        if (currentAnim == null || currentAnim.length == 0) return null;
 
         long now = System.currentTimeMillis();
 
         if (now - lastTime > frameDelay) {
             frameIndex = (frameIndex + 1) % currentAnim.length;
             lastTime = now;
+        }
+        if (frameIndex >= currentAnim.length) {
+            frameIndex = 0;
         }
 
         return currentAnim[frameIndex];
@@ -150,12 +159,11 @@ public class Client extends Thread {
     public void run() {
         System.out.println("Client " + name + " thread started");
 
-        //try {
-            //Socket socket = new Socket("localhost", port);
-
-            //PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            //BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            //System.out.println("Client " + name + " input stream created");
+        try {
+            Socket socket = new Socket("localhost", port);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            System.out.println("Client " + name + " input stream created");
 
             state = ClientState.CAMINANDO;
             UpdateAnimationArray();
@@ -163,50 +171,41 @@ public class Client extends Thread {
 
             state = ClientState.PIDIENDO;
             UpdateAnimationArray();
-            //String message = "clientArrive " + name;
-            //out.println(message);
-            //out.flush();
-            //System.out.println("Client " + name + " waiting for response...");
 
-            //String resp = in.readLine();
+            String message = "clientArrive " + name;
+            out.println(message);
+            out.flush();
+            System.out.println("Client " + name + " waiting for response...");
 
-            //if(resp != null && resp.equals("OK")){
-                //System.out.println("Client " + name + " got OK, leaving");
+            String resp = in.readLine();
+            System.out.println("Client " + name + " received: " + resp);
+
+            if(resp != null && resp.equals("OK")){
+                System.out.println("Client " + name + " got OK, leaving");
                 state = ClientState.SALIENDO;
                 UpdateAnimationArray();
                 esperar(1000);
                 state = ClientState.FUERA;
                 UpdateAnimationArray();
-                //running = false;
-            //} else {
-                //System.out.println("Client " + name + " did NOT get OK");
-            //}
+                running = false;
+            } else {
+                System.out.println("Client " + name + " did NOT get OK, received: " + resp);
+            }
 
-            //System.out.println("Client " + name + " closing socket");
-            //socket.close();
+            System.out.println("Client " + name + " closing socket");
+            socket.close();
 
-        //} catch (IOException e){
-            //System.out.println("Client " + name + " IOException: " + e.getMessage());
-            //e.printStackTrace();
-        //}
-
-        /*System.out.println("Cliente " + name + " ha iniciado su turno");
-        state = ClientState.CAMINANDO;
-        esperar(1000);
-        state = ClientState.PIDIENDO;
-        counter.clienteLlega(name);
-        state = ClientState.SALIENDO;
-        esperar(1000);
-        state = ClientState.FUERA;
-        System.out.println(name + " salió del restaurante.");*/
-
+        } catch (IOException e){
+            System.out.println("Client " + name + " IOException: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void esperar(int t){
-		try{
-			Thread.sleep(t);
-		}catch(InterruptedException e){
-			System.out.println(e);		
-		}
-	}
+        try{
+            Thread.sleep(t);
+        }catch(InterruptedException e){
+            System.out.println(e);
+        }
+    }
 }

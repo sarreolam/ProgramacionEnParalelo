@@ -1,4 +1,5 @@
 package Agents;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
@@ -9,75 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import Buffers.Counter;
 import Buffers.Kitchen;
 
-/*
-public class Employee extends Thread {
-    private final String name;
-    private final Counter counter;
-    private final Kitchen kitchen;
-    private boolean isRunning = true;
+import javax.imageio.ImageIO;
 
-    public enum EstadoEmpleado { NACIENDO, CAMINANDO_AL_MOSTRADOR, CAMINANDO_A_MAQUINA, ESPERANDO, ATENDIENDO, SALIENDO, FUERA, PREPARANDO }
-    private EstadoEmpleado state;
-
-    public Employee(String name, Counter counter, Kitchen kitchen) {
-        this.name = name;
-        this.counter = counter;
-        this.kitchen = kitchen;
-        this.state = EstadoEmpleado.NACIENDO;
-    }
-
-    @Override
-    public void run() {
-        
-        System.out.println(name + " ha comenzado su turno.");
-        state = EstadoEmpleado.FUERA;
-
-        kitchen.entrarCocina(name);
-        while (isRunning) {
-            try {
-                if (counter.hayClientesEsperando()) {
-                    state = EstadoEmpleado.CAMINANDO_AL_MOSTRADOR;
-                    System.out.println(name + " va al counter a atender.");
-                    Thread.sleep(1000);
-                    state = EstadoEmpleado.ATENDIENDO;
-                    int pedidoId = counter.empleadoLlega(name);
-                    if (pedidoId != -1) {
-                        kitchen.agregarPedido(pedidoId);
-                    }
-                } else if (kitchen.hayPedidosEnEspera()) {
-                    Integer pedido = kitchen.tomarPedido();
-                    if (pedido != null) {
-                        state = EstadoEmpleado.CAMINANDO_A_MAQUINA;
-                        Machine maquina = kitchen.obtenerMaquinaLibre();
-                        if (maquina != null) {
-                            System.out.println(name + " prepara pedido #" + pedido + " usando " + maquina.getNombre());
-                            state = EstadoEmpleado.PREPARANDO;
-                            maquina.preparar(name);
-                            System.out.println(name + " terminó pedido #" + pedido);
-                            counter.entregarPedido(pedido, name);
-                        } else {
-                            System.out.println(name + " no encontró máquina libre.");
-                            Thread.sleep(1000);
-                        }
-
-                    }
-                } else {
-                    state = EstadoEmpleado.ESPERANDO;
-                    System.out.println(name + " no ve clientes ni pedidos, esperando...");
-                    Thread.sleep(1000);
-                }
-            } catch (InterruptedException e) {
-                isRunning = false;
-                kitchen.salirCocina(name);
-                System.out.println(name + " terminó su turno.");
-            }
-        }
-    }
-    public EstadoEmpleado getEstado() {
-        return state;
-    }
-
-}*/
 public class Employee extends Thread {
     public int port = 5000;
     private final String name;
@@ -86,100 +20,276 @@ public class Employee extends Thread {
     public enum EmployeeState { NACIENDO, CAMINANDO_AL_MOSTRADOR, CAMINANDO_A_MAQUINA, ESPERANDO, ATENDIENDO, SALIENDO, FUERA, PREPARANDO }
     private EmployeeState state;
 
+    private final EmployeeMovement movement;
+    private int assignedCounterIndex = -1;
+    private int assignedMachineIndex = -1;
+
+    private BufferedImage[] walkAnim;
+    private BufferedImage[] workAnim;
+
+    private BufferedImage[] currentAnim;
+    private int frameIndex = 0;
+    private long lastTime = 0;
+    private int frameDelay = 120;
+
     public Employee(String name) {
         this.name = name;
         this.state = EmployeeState.NACIENDO;
+        this.movement = new EmployeeMovement(400, 300);
+        LoadSprites();
+        UpdateAnimationArray();
     }
 
-    public Employee(String name, int port){
-        this.name = name;
-        this.port = port;
-        this.state = EmployeeState.NACIENDO;
+    private void LoadSprites(){
+        try{
+            walkAnim = LoadAnim("src/main/java/Images/walkingClient_", 11);
+            workAnim = LoadAnim("src/main/java/Images/plinkIdle_",20);
+        } catch (RuntimeException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private BufferedImage[] LoadAnim(String base, int count) throws IOException {
+        BufferedImage[] anim = new BufferedImage[count];
+        for(int i = 0; i < count; i++){
+            anim[i] = ImageIO.read(new File(base + i + ".gif"));
+        }
+        return anim;
+    }
+
+    public void UpdateAnimationArray() {
+        BufferedImage[] previousAnim = currentAnim;
+
+        switch (state) {
+            case NACIENDO:
+                break;
+            case CAMINANDO_AL_MOSTRADOR:
+                currentAnim = walkAnim;
+                break;
+            case ESPERANDO:
+                currentAnim = workAnim;
+                break;
+            case CAMINANDO_A_MAQUINA:
+                currentAnim = walkAnim;
+                break;
+            case ATENDIENDO:
+                currentAnim = workAnim;
+                break;
+            case PREPARANDO:
+                currentAnim = workAnim;
+                break;
+            case FUERA:
+                currentAnim = workAnim;
+                break;
+            case SALIENDO:
+                currentAnim = walkAnim;
+                break;
+            default:
+                break;
+        }
+
+        if (previousAnim != currentAnim) {
+            frameIndex = 0;
+        }
+    }
+
+    public BufferedImage getCurrentSprite() {
+        if (currentAnim == null || currentAnim.length == 0) return null;
+
+        long now = System.currentTimeMillis();
+
+        if (now - lastTime > frameDelay) {
+            frameIndex = (frameIndex + 1) % currentAnim.length;
+            lastTime = now;
+        }
+
+        if (frameIndex >= currentAnim.length) {
+            frameIndex = 0;
+        }
+
+        return currentAnim[frameIndex];
     }
 
     public EmployeeState getEmployeeState() {
         return state;
     }
 
-    @Override
-    public void run() {
-        System.out.println(name + " ha comenzado su turno.");
+    public double getX() {
+        return movement.getPositionX();
+    }
 
-        while (running) {
-            try (Socket socket = new Socket("localhost", port);
-                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+    public double getY() {
+        return movement.getPositionY();
+    }
 
-                out.println("employeeCheckClients " + name);
-                boolean hasClients = Boolean.parseBoolean(in.readLine());
+    public void UpdateAnimation() {
+        movement.moveTowardsTarget();
 
-                if (hasClients) {
-                    state = EmployeeState.CAMINANDO_AL_MOSTRADOR;
-                    System.out.println(name + " va al counter a atender.");
-                    Thread.sleep(1000);
-
+        if (movement.hasReachedTarget()) {
+            switch (state) {
+                case NACIENDO:
+                    movement.setTargetToWaitingArea();
+                    break;
+                case CAMINANDO_AL_MOSTRADOR:
                     state = EmployeeState.ATENDIENDO;
-                    out.println("employeeArrive " + name);
-                    String reply = in.readLine();
-                    int pedidoId = Integer.parseInt(reply);
-
-                    if (pedidoId != -1) {
-                        out.println("employeeAddOrder " + name + " " + pedidoId);
-                        in.readLine();
-
-                        out.println("employeeCheckOrders " + name);
-                        boolean hasOrders = Boolean.parseBoolean(in.readLine());
-
-                        if (hasOrders) {
-                            out.println("employeeTakeOrder " + name);
-                            pedidoId = Integer.parseInt(in.readLine());
-
-                            out.println("employeeGetMachine " + name);
-                            String machineName = in.readLine();
-
-                            if (!"none".equals(machineName)) {
-                                state = EmployeeState.PREPARANDO;
-                                System.out.println(name + " prepara pedido #" + pedidoId + " usando " + machineName);
-                                Thread.sleep(2000);
-
-                                out.println("employeeDeliverOrder " + name + " " + pedidoId);
-                                in.readLine();
-                            }
-                        }
-                    }
-                } else {
-
-                    out.println("employeeCheckOrders " + name);
-                    boolean hasOrders = Boolean.parseBoolean(in.readLine());
-
-                    if (hasOrders) {
-                        out.println("employeeTakeOrder " + name);
-                        int pedidoId = Integer.parseInt(in.readLine());
-
-                        out.println("employeeGetMachine " + name);
-                        String machineName = in.readLine();
-
-                        if (!"none".equals(machineName)) {
-                            state = EmployeeState.PREPARANDO;
-                            System.out.println(name + " prepara pedido #" + pedidoId + " usando " + machineName);
-                            Thread.sleep(2000);
-
-                            out.println("employeeDeliverOrder " + name + " " + pedidoId);
-                            in.readLine();
-                        }
-                    } else {
-                        state = EmployeeState.ESPERANDO;
-                        System.out.println(name + " no ve clientes ni pedidos, esperando...");
-                        Thread.sleep(1000);
-                    }
-                }
-
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-                running = false;
+                    movement.setTargetToCounter(assignedCounterIndex);
+                    UpdateAnimationArray();
+                    break;
+                case CAMINANDO_A_MAQUINA:
+                    state = EmployeeState.PREPARANDO;
+                    movement.setTargetToMachine(assignedMachineIndex);
+                    UpdateAnimationArray();
+                    break;
+                case SALIENDO:
+                    state = EmployeeState.FUERA;
+                    UpdateAnimationArray();
+                    break;
+                case ESPERANDO:
+                case ATENDIENDO:
+                case PREPARANDO:
+                case FUERA:
+                    break;
             }
         }
     }
 
+    @Override
+    public void run() {
+        System.out.println(name + " ha comenzado su turno.");
+        try (Socket socket = new Socket("localhost", port);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
+            System.out.println(name + " conectado al servidor.");
+            state = EmployeeState.NACIENDO;
+            UpdateAnimationArray();
+
+            this.assignedCounterIndex = (new Random().nextInt(5));
+
+            while (running) {
+                out.println("employeeCheckClients " + name);
+                String response = in.readLine();
+                boolean hasClient = Boolean.parseBoolean(response);
+
+                if (hasClient) {
+                    state = EmployeeState.CAMINANDO_AL_MOSTRADOR;
+                    UpdateAnimationArray();
+                    movement.setTargetToCounter(assignedCounterIndex);
+
+                    // Esperar a llegar
+                    while (!movement.hasReachedTarget()) {
+                        Thread.sleep(50);
+                    }
+
+                    out.println("employeeArrive " + name);
+                    String pedidoResponse = in.readLine();
+                    int pedidoId = Integer.parseInt(pedidoResponse);
+
+                    if (pedidoId != -1) {
+                        System.out.println(name + " obtuvo pedido #" + pedidoId);
+
+                        out.println("employeeAddOrder " + name + " " + pedidoId);
+                        in.readLine();
+
+                        out.println("employeeTakeOrder " + name);
+                        String orderResponse = in.readLine();
+                        int takenOrder = Integer.parseInt(orderResponse);
+
+                        if (takenOrder != -1) {
+                            out.println("employeeGetMachine " + name);
+                            String machineName = in.readLine();
+
+                            if (!machineName.equals("none")) {
+                                if (machineName.startsWith("Machine")) {
+                                    assignedMachineIndex = Integer.parseInt(machineName.substring(7));
+                                }
+
+                                state = EmployeeState.CAMINANDO_A_MAQUINA;
+                                UpdateAnimationArray();
+                                movement.setTargetToMachine(assignedMachineIndex);
+
+                                while (!movement.hasReachedTarget()) {
+                                    Thread.sleep(50);
+                                }
+
+                                System.out.println(name + " terminó de preparar pedido #" + takenOrder);
+
+                                out.println("employeeDeliverOrder " + name + " " + takenOrder);
+                                in.readLine();
+
+                                state = EmployeeState.ESPERANDO;
+                                UpdateAnimationArray();
+                                movement.setTargetToWaitingArea();
+
+                                while (!movement.hasReachedTarget()) {
+                                    Thread.sleep(50);
+                                }
+
+                                state = EmployeeState.ESPERANDO;
+                                UpdateAnimationArray();
+                            } else {
+                                System.out.println(name + " no encontró máquina disponible");
+                                Thread.sleep(1000);
+                            }
+                        }
+                    }
+                } else {
+                    out.println("employeeCheckOrders " + name);
+                    response = in.readLine();
+                    boolean hasOrders = Boolean.parseBoolean(response);
+
+                    if (hasOrders) {
+                        out.println("employeeTakeOrder " + name);
+                        String orderResponse = in.readLine();
+                        int pedidoId = Integer.parseInt(orderResponse);
+
+                        if (pedidoId != -1) {
+                            out.println("employeeGetMachine " + name);
+                            String machineName = in.readLine();
+
+                            if (!machineName.equals("none")) {
+                                if (machineName.startsWith("Machine")) {
+                                    assignedMachineIndex = Integer.parseInt(machineName.substring(7));
+                                }
+
+                                state = EmployeeState.CAMINANDO_A_MAQUINA;
+                                UpdateAnimationArray();
+                                movement.setTargetToMachine(assignedMachineIndex);
+
+                                while (!movement.hasReachedTarget()) {
+                                    Thread.sleep(50);
+                                }
+
+                                System.out.println(name + " terminó de preparar pedido #" + pedidoId);
+
+                                out.println("employeeDeliverOrder " + name + " " + pedidoId);
+                                in.readLine();
+
+                                state = EmployeeState.ESPERANDO;
+                                UpdateAnimationArray();
+                                movement.setTargetToWaitingArea();
+
+                                while (!movement.hasReachedTarget()) {
+                                    Thread.sleep(50);
+                                }
+
+                                state = EmployeeState.ESPERANDO;
+                                UpdateAnimationArray();
+                            }
+                        }
+                    } else {
+                        if (state != EmployeeState.ESPERANDO) {
+                            state = EmployeeState.ESPERANDO;
+                            UpdateAnimationArray();
+                            movement.setTargetToWaitingArea();
+                        }
+                        Thread.sleep(1000);
+                    }
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            running = false;
+        }
+    }
 }
