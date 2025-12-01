@@ -4,7 +4,6 @@ import Agents.Machine;
 import Buffers.Counter;
 import Buffers.CounterServer;
 import Buffers.Kitchen;
-import Buffers.Store;
 import Buffers.Window;
 
 import javax.swing.*;
@@ -120,7 +119,7 @@ public class VentanaPrincipal extends JFrame {
                 JTextArea textArea = new JTextArea();
                 Semaphore semaphore = new Semaphore(1);
 
-                StoreVisual storeVisual = new StoreVisual(textArea, semaphore, employeesList);
+                KitchenVisual storeVisual = new KitchenVisual(textArea, semaphore, employeesList);
                 storeVisual.setSize(800, 600);
 
                 animationFrame.add(storeVisual);

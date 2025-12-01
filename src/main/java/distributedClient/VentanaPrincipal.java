@@ -1,5 +1,10 @@
 import Agents.Client;
+import Buffers.Chair;
 import Buffers.CounterClient;
+import Buffers.Store;
+import Utils.ClientStateTable;
+import Utils.GeneralTable;
+import Utils.StateTable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,6 +12,7 @@ import java.util.concurrent.Semaphore;
 
 public class VentanaPrincipal extends JFrame {
     private final JTextField numClientes = new JTextField("5");
+    private final JTextField numSillas = new JTextField("5");
     private final JButton inicializarBtn = new JButton("Inicializar Simulación");
     private final JCheckBox mostrarAnimacionCheck = new JCheckBox("Mostrar Animación Visual", true);
 
@@ -26,6 +32,8 @@ public class VentanaPrincipal extends JFrame {
 
         panelCentro.add(new JLabel("Número de Clientes:"));
         panelCentro.add(numClientes);
+        panelCentro.add(new JLabel("Número de sillas:"));
+        panelCentro.add(numSillas);
 
 
         add(panelCentro, BorderLayout.CENTER);
@@ -50,9 +58,10 @@ public class VentanaPrincipal extends JFrame {
     public void InicializarAgentes() {
 
         int numClients = Integer.parseInt(numClientes.getText());
+        int numSillas1 = Integer.parseInt(numSillas.getText());
         boolean mostrarAnimacion = mostrarAnimacionCheck.isSelected();
 
-        if (numClients <= 0) {
+        if (numClients <= 0 || numSillas1 < 0) {
             JOptionPane.showMessageDialog(this,
                     "Los valores deben ser mayores a 0",
                     "Error",
@@ -65,11 +74,17 @@ public class VentanaPrincipal extends JFrame {
 
         CounterClient counterClient = new CounterClient();
 
-//        Store store = new Store(10);
+        Chair[] chairs = new Chair[numSillas1];
+
+        for (int i = 0; i < numSillas1; i++){
+            chairs[i] = new Chair("Silla"+ (i+1));
+        }
+
+        Store store = new Store(10, chairs);
         Client[] clientsArray = new Client[numClients];
 
         for (int i = 0; i < numClients; i++) {
-            Agents.Client client = new Client("Client" + (i + 1), counterClient);
+            Agents.Client client = new Client("Client" + (i + 1), counterClient, store);
             clientsArray[i] = client;
             client.start();
 
@@ -98,6 +113,10 @@ public class VentanaPrincipal extends JFrame {
         GeneralTable generalTable = new GeneralTable(clientsArray);
         Thread generalThread = new Thread(generalTable);
         generalThread.start();
+
+        ClientStateTable clientStateTable = new ClientStateTable(clientsArray);
+        Thread clientTableThread = new Thread(clientStateTable);
+        clientTableThread.start();
 
         StateTable stateTable = new StateTable(clientsArray);
         Thread stateThread = new Thread(stateTable);
