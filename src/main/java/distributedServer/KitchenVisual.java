@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 //store visual de empleados
-public class StoreVisual extends MyCanvasE {
+public class KitchenVisual extends MyCanvasE {
     //coordenadas de los counters hardcodeado
     private static final int COUNTER_X = 650;
     private static final int COUNTER_Y_START = 100;
@@ -23,7 +23,7 @@ public class StoreVisual extends MyCanvasE {
     private static final int MACHINE_COUNT = 5;
     private Image background;
 
-    public StoreVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees) {
+    public KitchenVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees) {
         super(tArea, semaphore, employees);
         try {
             background = ImageIO.read(new File("Images/restaurant.jpg"));

@@ -1,3 +1,5 @@
+package Utils;
+
 import Agents.Client;
 
 import javax.swing.*;
