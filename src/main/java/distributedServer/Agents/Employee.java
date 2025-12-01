@@ -27,21 +27,28 @@ public class Employee extends Thread {
     private int frameIndex = 0;
     private long lastTime = 0;
     private final int frameDelay = 120;
-    public Employee(String name) {
+
+    private final int tiempoAtender;
+    private final double velocidadMovimiento;
+
+    /*
+    public Employee(String name,int tiempoAtender, int velocidadMovimiento) {
         this.name = name;
         this.state = EmployeeState.NACIENDO;
-        this.movement = new EmployeeMovement(400, 300);
+        this.movement = new EmployeeMovement(400, 300, speed);
         LoadSprites();
         UpdateAnimationArray();
-    }
+    }*/
 
-    public Employee(String name, Counter counter, Window window, Kitchen kitchen) {
+    public Employee(String name, Counter counter, Window window, Kitchen kitchen, int tiempoAtender, int velocidadMovimiento) {
         this.name = name;
         this.counter = counter;
         this.kitchen = kitchen;
         this.window = window;
+        this.tiempoAtender = tiempoAtender;
+        this.velocidadMovimiento = velocidadMovimiento;
         this.state = EmployeeState.NACIENDO;
-        this.movement = new EmployeeMovement(400, 300);
+        this.movement = new EmployeeMovement(400, 300, velocidadMovimiento);
         LoadSprites();
         UpdateAnimationArray();
     }
@@ -171,7 +178,7 @@ public class Employee extends Thread {
                 if (counter.hayClientesEsperando()) {
                     state = EmployeeState.CAMINANDO_AL_MOSTRADOR;
                     System.out.println(name + " va al counter a atender.");
-                    Thread.sleep(1000);
+                    Thread.sleep(tiempoAtender* 1000L);
                     state = EmployeeState.ATENDIENDO;
                     int pedidoId = counter.empleadoLlega(name);
                     if (pedidoId != -1) {
@@ -180,7 +187,7 @@ public class Employee extends Thread {
                 }else if(window.hayCarrosEsperando()) {
                     state = EmployeeState.CAMINANDO_A_VENTANILLA;
                     System.out.println(name + " va a la ventanilla a atender.");
-                    Thread.sleep(1000);
+                    Thread.sleep(tiempoAtender* 1000L);
                     state = EmployeeState.ATENDIENDO;
                     int pedidoId = window.empleadoLlega(name);
                     if (pedidoId != -1) {
@@ -199,11 +206,11 @@ public class Employee extends Thread {
 
                             if(pedido.getSource().equals("counter")){
                                 state = EmployeeState.CAMINANDO_AL_MOSTRADOR;
-                                Thread.sleep(1000);
+                                Thread.sleep(tiempoAtender*1000L);
                                 counter.entregarPedido(pedido, name);
                             }else{
                                 state = EmployeeState.CAMINANDO_A_VENTANILLA;
-                                Thread.sleep(1000);
+                                Thread.sleep(tiempoAtender*1000L);
                                 window.entregarPedido(pedido, name);
                             }
                         } else {

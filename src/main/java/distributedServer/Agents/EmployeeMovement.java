@@ -20,15 +20,18 @@ public class EmployeeMovement {
     // coordenadas de espera
     private static final int WAITING_X = 400;
     private static final int WAITING_Y = 300;
-    private final double speed = 3.0; // Velocidad de movimiento en píxeles/frame
     private double positionX, positionY;
     private double targetX, targetY;
 
-    public EmployeeMovement(int initialX, int initialY) {
+    private final double speed;
+
+
+    public EmployeeMovement(int initialX, int initialY, int speed) {
         this.positionX = initialX;
         this.positionY = initialY;
         this.targetX = initialX;
         this.targetY = initialY;
+        this.speed = speed;
     }
 
     public double getPositionX() {
