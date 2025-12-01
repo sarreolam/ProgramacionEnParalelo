@@ -9,7 +9,7 @@ import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class Counter {
-    private final int capacidadMaxima;
+    private final int capMaxCounter;
     private final Semaphore espaciosDisponibles;
     private final Semaphore clientesEsperando;
     private final Object mutex = new Object();
@@ -18,8 +18,8 @@ public class Counter {
     private final Map<String, Boolean> pedidosListos = new HashMap<>();
     private int idCounter = 0;
 
-    public Counter() {
-        this.capacidadMaxima = 5;
+    public Counter(int capacidadMaxima) {
+        this.capMaxCounter = capacidadMaxima;
         this.espaciosDisponibles = new Semaphore(capacidadMaxima, true);
         this.clientesEsperando = new Semaphore(0, true);
     }

@@ -11,9 +11,15 @@ public class Machine extends Thread {
     private final Random random = new Random();
     private EstadoMaquina estado;
     private final boolean isRunning = true;
-    public Machine(String nombre) {
+    private final int tiempoPreparar;
+    private final int tiempoReparacion;
+
+
+    public Machine(String nombre, int tiempoPreparar, int tiempoReparacion) {
         this.nombre = nombre;
         this.estado = EstadoMaquina.OPERATIVA;
+        this.tiempoPreparar = tiempoPreparar;
+        this.tiempoReparacion = tiempoReparacion;
     }
 
     public boolean tryUse() {
@@ -28,7 +34,7 @@ public class Machine extends Thread {
 
         try {
             // Simular trabajo de preparación
-            runFor(2000);
+            runFor(tiempoPreparar);
 
             // Probabilidad de avería (20%)
             if (random.nextInt(10) < 2) {
@@ -60,7 +66,7 @@ public class Machine extends Thread {
                     if (lock.tryLock()) {
                         try {
                             estado = EstadoMaquina.REPARANDO;
-                            runFor(3000);
+                            runFor(tiempoReparacion);
                             estado = EstadoMaquina.OPERATIVA;
                             System.out.println(nombre + " reparada - vuelve a OPERATIVA");
                         } finally {
@@ -97,13 +103,14 @@ public class Machine extends Thread {
         }
     }
 
-    private void runFor(long millis) {
+    private void runFor(long seconds) {
+        long millis = seconds * 1000;
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < millis) {
-            // Mantente ocupado (simulando trabajo)
             double x = Math.sin(System.nanoTime());
         }
     }
+
 
     @Override
     public String toString() {

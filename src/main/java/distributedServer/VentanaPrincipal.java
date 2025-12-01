@@ -17,6 +17,14 @@ public class VentanaPrincipal extends JFrame {
     private final JTextField numMaquinas = new JTextField("5");
     private final JButton inicializarBtn = new JButton("Inicializar Simulación");
     private final JCheckBox mostrarAnimacionCheck = new JCheckBox("Mostrar Animación Visual", true);
+    private final JTextField tmpAtendiendo = new JTextField("1");
+    private final JTextField tmpPreparando = new JTextField("2");
+    private final JTextField tmpReparando = new JTextField("2");
+
+    private final JTextField velMovimiento= new JTextField("3");
+    private final JTextField capMaxCounter= new JTextField("5");
+
+
 
 
     public VentanaPrincipal() {
@@ -29,7 +37,7 @@ public class VentanaPrincipal extends JFrame {
         tituloLabel.setFont(new Font("Arial", Font.BOLD, 18));
         add(tituloLabel, BorderLayout.NORTH);
 
-        JPanel panelCentro = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel panelCentro = new JPanel(new GridLayout(8, 3, 5, 5));
         panelCentro.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
         panelCentro.add(new JLabel("Número de Drive-Through:"));
@@ -40,6 +48,18 @@ public class VentanaPrincipal extends JFrame {
 
         panelCentro.add(new JLabel("Número de Máquinas:"));
         panelCentro.add(numMaquinas);
+        panelCentro.add(new JLabel("Tiempo Atendiendo (s):"));
+        panelCentro.add(tmpAtendiendo);
+        panelCentro.add(new JLabel("Tiempo de Preparación (s):"));
+        panelCentro.add(tmpPreparando);
+        panelCentro.add(new JLabel("Tiempo de Reparacion (s):"));
+        panelCentro.add(tmpReparando);
+        panelCentro.add(new JLabel("Velocidad del empleado:"));
+        panelCentro.add(velMovimiento);
+        panelCentro.add(new JLabel("Capacidad Máxima del Counter:"));
+        panelCentro.add(capMaxCounter);
+
+
 
         add(panelCentro, BorderLayout.CENTER);
 
@@ -66,6 +86,12 @@ public class VentanaPrincipal extends JFrame {
         int numEmployees = Integer.parseInt(numEmpleados.getText());
         int numMachines = Integer.parseInt(numMaquinas.getText());
         boolean mostrarAnimacion = mostrarAnimacionCheck.isSelected();
+        int tiempoAtender = Integer.parseInt(tmpAtendiendo.getText());
+        int tiempoPreparar = Integer.parseInt(tmpPreparando.getText());
+        int tiempoReparar = Integer.parseInt(tmpReparando.getText());
+
+        int velocidadMovimiento = Integer.parseInt(velMovimiento.getText());
+        int capacidadMaximaCounter = Integer.parseInt(capMaxCounter.getText());
 
         if (numEmployees <= 0 || numMachines <= 0 || drive <= 0) {
             JOptionPane.showMessageDialog(this,
@@ -81,13 +107,13 @@ public class VentanaPrincipal extends JFrame {
         Employee[] employeesArray = new Employee[numEmployees];
         ArrayList<Employee> employeesList = new ArrayList<>();
 
-        Counter counter = new Counter();
+        Counter counter = new Counter(capacidadMaximaCounter);
         CounterServer counterServer = new CounterServer(counter);
         counterServer.start();
 
         Machine[] machines = new Machine[numMachines];
         for (int i = 0; i < numMachines; i++) {
-            Machine m = new Machine("Machine" + i);
+            Machine m = new Machine("Machine" + i, tiempoPreparar, tiempoReparar);
             machines[i] = m;
             machines[i].start();
         }
@@ -96,7 +122,7 @@ public class VentanaPrincipal extends JFrame {
         Kitchen kitchen = new Kitchen(machines);
 
         for (int i = 0; i < numEmployees; i++) {
-            Employee employee = new Employee("Employee" + (i + 1), counter,window, kitchen);
+            Employee employee = new Employee("Employee" + (i + 1), counter,window, kitchen, tiempoAtender, velocidadMovimiento);
             employeesArray[i] = employee;
             employeesList.add(employee);
             employee.start();
