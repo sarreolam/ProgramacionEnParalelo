@@ -1,3 +1,4 @@
+import Agents.DriveThru;
 import Agents.Employee;
 
 import javax.imageio.ImageIO;
@@ -20,19 +21,17 @@ public class KitchenVisual extends MyCanvasE {
     public ArrayList<Point> counterPoints = new ArrayList<>();
     public ArrayList<Point> machinePoints = new ArrayList<>();
 
-    private Image ventImg;
     public Image counterImg;
     private Image machineImg;
 
-    public KitchenVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees, int COUNTER_COUNT, int MACHINE_COUNT) {
+    public KitchenVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees, ArrayList<DriveThru> driveThrus, int COUNTER_COUNT, int MACHINE_COUNT) {
 
-        super(tArea, semaphore, employees);
+        super(tArea, semaphore, employees, driveThrus);
         this.COUNTER_COUNT = COUNTER_COUNT;
         this.MACHINE_COUNT = MACHINE_COUNT;
 
         try {
             background = ImageIO.read(new File("Images/fondo.jpg"));
-            //ventImg = ImageIO.read(new File("Images/ventanilla.png"));
             counterImg = ImageIO.read(new File("Images/counter.png"));
             machineImg = ImageIO.read(new File("Images/machine.png"));
         } catch (IOException e) {
@@ -42,7 +41,7 @@ public class KitchenVisual extends MyCanvasE {
     }
 
     void activatePaintingAgents() {
-        PaintingAgentsE paintingAgents = new PaintingAgentsE(employees, this);
+        PaintingAgentsE paintingAgents = new PaintingAgentsE(employees, driveThrus, this);
         Thread th = new Thread(paintingAgents);
         th.start();
     }
@@ -90,12 +89,10 @@ public class KitchenVisual extends MyCanvasE {
 
             if (counterImg != null) {
                 g.drawImage(counterImg, counterX, y, counterWidth, counterHeight, this);
-
             } else {
                 g.setColor(new Color(255, 75, 0));
                 g.fillRect(counterX, y, counterWidth, counterHeight);
             }
-
 
             g.setColor(Color.WHITE);
             g.drawString("Counter " + (i + 1), counterX + 10, y - 5);
@@ -117,7 +114,6 @@ public class KitchenVisual extends MyCanvasE {
 
             if (machineImg != null) {
                 g.drawImage(machineImg, machineX, y, machineSize, machineSize, this);
-
             } else {
                 g.setColor(new Color(255, 75, 0));
                 g.fillRect(machineX, y, machineSize, machineSize);
@@ -137,6 +133,30 @@ public class KitchenVisual extends MyCanvasE {
             employee.getMovement().setMachinePoints(machinePoints);
         }
 
+        for (DriveThru driveThru : driveThrus) {
+            driveThru.getMovement().setVentanillaPosition(400, 0);
+            driveThru.getMovement().setPuntoEntrada(600, 0);
+            driveThru.getMovement().setPuntoSalida(w + 100, 0);
+        }
+        for (DriveThru driveThru : driveThrus) {
+            int cx = (int) driveThru.getX();
+            if (cx < -50) { // Si está demasiado a la izquierda (fuera de pantalla)
+                continue; // No dibujar
+            }
+
+            int cy = (int) driveThru.getY();
+            BufferedImage carSprite = driveThru.getCurrentSprite();
+
+            if (carSprite != null) {
+                g.drawImage(carSprite, cx, cy, 60, 40, null);
+            } else {
+                g.setColor(Color.RED);
+                g.fillRect(cx, cy, 60, 40);
+            }
+
+            g.setColor(Color.WHITE);
+            g.drawString(driveThru.getCarName(), cx, cy + 55);
+        }
         for (Employee employee : employees) {
             int px = (int) employee.getX();
             int py = (int) employee.getY();
@@ -148,7 +168,7 @@ public class KitchenVisual extends MyCanvasE {
             if (sprite != null) {
                 g.drawImage(sprite, px, py, 40, 40, null);
             } else {
-                g.setColor(Color.RED);
+                g.setColor(Color.BLUE);
                 g.fillOval(px, py, 20, 20);
             }
         }

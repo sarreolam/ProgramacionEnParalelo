@@ -145,7 +145,7 @@ public class VentanaPrincipal extends JFrame {
                 JTextArea textArea = new JTextArea();
                 Semaphore semaphore = new Semaphore(1);
 
-                KitchenVisual storeVisual = new KitchenVisual(textArea, semaphore, employeesList, capacidadMaximaCounter, numMachines);
+                KitchenVisual storeVisual = new KitchenVisual(textArea, semaphore, employeesList, driveThrusList, capacidadMaximaCounter, numMachines);
                 storeVisual.setSize(800, 600);
 
                 animationFrame.add(storeVisual);
