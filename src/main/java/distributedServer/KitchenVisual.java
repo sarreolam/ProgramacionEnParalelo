@@ -20,6 +20,10 @@ public class KitchenVisual extends MyCanvasE {
     public ArrayList<Point> counterPoints = new ArrayList<>();
     public ArrayList<Point> machinePoints = new ArrayList<>();
 
+    private Image ventImg;
+    public Image counterImg;
+    private Image machineImg;
+
     public KitchenVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees, int COUNTER_COUNT, int MACHINE_COUNT) {
 
         super(tArea, semaphore, employees);
@@ -27,7 +31,10 @@ public class KitchenVisual extends MyCanvasE {
         this.MACHINE_COUNT = MACHINE_COUNT;
 
         try {
-            background = ImageIO.read(new File("Images/restaurant.jpg"));
+            background = ImageIO.read(new File("Images/fondo.jpg"));
+            //ventImg = ImageIO.read(new File("Images/ventanilla.png"));
+            counterImg = ImageIO.read(new File("Images/counter.png"));
+            machineImg = ImageIO.read(new File("Images/machine.png"));
         } catch (IOException e) {
             System.out.println("No se pudo cargar la imagen: " + e.getMessage());
         }
@@ -51,7 +58,7 @@ public class KitchenVisual extends MyCanvasE {
         int w = getWidth();
         int h = getHeight();
         if (background != null) {
-            g.drawImage(background, 0, 0, w, h, this);
+            g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
         } else {
             g.setColor(Color.WHITE);
             g.fillRect(0, 0, w, h);
@@ -73,19 +80,24 @@ public class KitchenVisual extends MyCanvasE {
         g.drawString("VENTANILLA", ventX + 15, ventY - 5);
 
         int counterWidth = 100;
-        int counterHeight = 40;
+        int counterHeight = 80;
 
         int espacioCounter = h / (COUNTER_COUNT + 1);
         int counterX = (int)(w * 0.75);
 
-        g.setColor(new Color(150, 75, 0));
-
         for (int i = 0; i < COUNTER_COUNT; i++) {
             int y = espacioCounter * (i + 1);
 
-            g.fillRect(counterX, y, counterWidth, counterHeight);
+            if (counterImg != null) {
+                g.drawImage(counterImg, counterX, y, counterWidth, counterHeight, this);
 
-            g.setColor(Color.BLACK);
+            } else {
+                g.setColor(new Color(255, 75, 0));
+                g.fillRect(counterX, y, counterWidth, counterHeight);
+            }
+
+
+            g.setColor(Color.WHITE);
             g.drawString("Counter " + (i + 1), counterX + 10, y - 5);
 
             counterPoints.add(new Point(counterX - 50, y + counterHeight / 2));
@@ -103,7 +115,13 @@ public class KitchenVisual extends MyCanvasE {
         for (int i = 0; i < MACHINE_COUNT; i++) {
             int y = espacioMachine * (i + 1);
 
-            g.fillRect(machineX, y, machineSize, machineSize);
+            if (machineImg != null) {
+                g.drawImage(machineImg, machineX, y, machineSize, machineSize, this);
+
+            } else {
+                g.setColor(new Color(255, 75, 0));
+                g.fillRect(machineX, y, machineSize, machineSize);
+            }
 
             g.setColor(Color.WHITE);
             g.drawString("M. " + (i + 1), machineX + 20, y + 35);
@@ -124,7 +142,7 @@ public class KitchenVisual extends MyCanvasE {
             int py = (int) employee.getY();
             BufferedImage sprite = employee.getCurrentSprite();
 
-            g.setColor(Color.BLUE);
+            g.setColor(Color.WHITE);
             g.drawString(employee.getEmployeeState().toString(), px - 10, py - 5);
 
             if (sprite != null) {
@@ -133,9 +151,6 @@ public class KitchenVisual extends MyCanvasE {
                 g.setColor(Color.RED);
                 g.fillOval(px, py, 20, 20);
             }
-
-            g.setColor(Color.WHITE);
-            g.drawString(employee.getEmployeeName(), px - 10, py + 55);
         }
     }
 }
