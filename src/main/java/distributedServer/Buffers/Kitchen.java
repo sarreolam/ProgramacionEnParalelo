@@ -1,3 +1,7 @@
+/**
+ * Verifica si hay máquinas disponibles sin bloquear
+ * @return true si al menos una máquina está libre
+ */
 package Buffers;
 
 import Agents.Machine;
@@ -18,7 +22,14 @@ public class Kitchen {
         this.empleadosDentro = new Semaphore(5, true);
         this.machines = machines;
     }
-
+    public boolean hayMaquinasDisponibles() {
+        for (Machine m : machines) {
+            if (m.getEstado() == Machine.EstadoMaquina.OPERATIVA) {
+                return true;
+            }
+        }
+        return false;
+    }
     public synchronized void agregarPedido(int pedidoId, String source) {
         pedidosPendientes.add(new Pedido(pedidoId, source));
         System.out.println("Pedido #" + pedidoId + " agregado a la cocina. Total pendientes: " + pedidosPendientes.size());
@@ -61,7 +72,21 @@ public class Kitchen {
         return null;
     }
 
-    //cambio el tryUse() hacia que se bloquearan todas la maquinas
+    public int getIndexOfMachine(Machine machine) {
+        if (machine == null) {
+            return 0;
+        }
+
+        for (int i = 0; i < machines.length; i++) {
+            if (machines[i] == machine) {
+                return i;
+            }
+        }
+
+        System.out.println("⚠️ Máquina no encontrada en el array, retornando índice 0");
+        return 0;
+    }
+
     public int getUsedMachines() {
         int usedMachines = 0;
         for (Machine m : machines) {
@@ -72,7 +97,6 @@ public class Kitchen {
         return usedMachines;
     }
 
-    //lo mismo
     public int getUnusedMachines() {
         int unusedMachines = 0;
         for (Machine m : machines) {

@@ -1,32 +1,20 @@
-// Archivo: Agents/EmployeeMovement.java
 package Agents;
 
-//por ahora no verfica si la maquina o el counters ya estan siendo ocupados por eso se enciman
+import java.awt.*;
+import java.util.ArrayList;
+
 public class EmployeeMovement {
 
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
-
-    //coordenadas de los counters
-    private static final int COUNTER_X = 650;
-    private static final int COUNTER_Y_START = 100;
-    private static final int COUNTER_SPACING = 100;
-
-    //coordenandas de las maquinas
-    private static final int MACHINE_X = 150;
-    private static final int MACHINE_Y_START = 100;
-    private static final int MACHINE_SPACING = 80;
-
-    // coordenadas de espera
-    private static final int WAITING_X = 400;
-    private static final int WAITING_Y = 300;
     private double positionX, positionY;
     private double targetX, targetY;
+    private double speed;
 
-    private final double speed;
+    // Posiciones dinámicas
+    private double windowX = 600, windowY = 800;
+    private ArrayList<Point> counterPoints = new ArrayList<>();
+    private ArrayList<Point> machinePoints = new ArrayList<>();
 
-
-    public EmployeeMovement(int initialX, int initialY, int speed) {
+    public EmployeeMovement(int initialX, int initialY, double speed) {
         this.positionX = initialX;
         this.positionY = initialY;
         this.targetX = initialX;
@@ -42,53 +30,87 @@ public class EmployeeMovement {
         return positionY;
     }
 
-    public void setPosition(double x, double y) {
-        this.positionX = x;
-        this.positionY = y;
-    }
-
     public void setTarget(double x, double y) {
         this.targetX = x;
         this.targetY = y;
     }
 
-
-    public boolean hasReachedTarget() {
-        return Math.abs(targetX - positionX) < speed && Math.abs(targetY - positionY) < speed;
+    public void setWindowPosition(double x, double y) {
+        this.windowX = x;
+        this.windowY = y;
     }
 
+    public void setCounterPoints(ArrayList<Point> list) {
+        if (list != null) {
+            this.counterPoints = new ArrayList<>(list);
+        }
+    }
 
-    public boolean moveTowardsTarget() {
+    public void setMachinePoints(ArrayList<Point> list) {
+        if (list != null) {
+            this.machinePoints = new ArrayList<>(list);
+        }
+    }
+
+    public void setTargetToWindow() {
+        setTarget(windowX, windowY);
+    }
+
+    public void setTargetToCounter(int index) {
+        if (counterPoints.isEmpty()) {
+            System.out.println("counterPoints está vacío");
+            return;
+        }
+
+        if (index < 0 || index >= counterPoints.size()) {
+            index = 0;
+        }
+
+        Point p = counterPoints.get(index);
+        setTarget(p.x, p.y);
+        System.out.println(" Target counter " + index + ": (" + p.x + ", " + p.y + ")");
+    }
+
+    public void setTargetToMachine(int index) {
+        if (machinePoints.isEmpty()) {
+            System.out.println(" machinePoints está vacío");
+            return;
+        }
+
+        if (index < 0 || index >= machinePoints.size()) {
+            index = 0;
+        }
+
+        Point p = machinePoints.get(index);
+        setTarget(p.x, p.y);
+        System.out.println("Target machine " + index + ": (" + p.x + ", " + p.y + ")");
+    }
+
+    public void setTargetToWaitingArea() {
+        // Área de espera en el centro
+        setTarget(400, 300);
+    }
+
+    public boolean hasReachedTarget() {
+        return Math.abs(targetX - positionX) < speed &&
+                Math.abs(targetY - positionY) < speed;
+    }
+
+    public void moveTowardsTarget() {
         if (hasReachedTarget()) {
             positionX = targetX;
             positionY = targetY;
-            return true;
+            return;
         }
 
         double dx = targetX - positionX;
         double dy = targetY - positionY;
+
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        positionX += (dx / distance) * speed;
-        positionY += (dy / distance) * speed;
-        return false;
-    }
-
-
-    public void setTargetToWaitingArea() {
-        setTarget(WAITING_X, WAITING_Y);
-    }
-
-
-    public void setTargetToCounter(int counterIndex) {
-        if (counterIndex < 0 || counterIndex > 4) counterIndex = 0;
-        double targetY = COUNTER_Y_START + counterIndex * COUNTER_SPACING;
-        setTarget(COUNTER_X, targetY);
-    }
-
-    public void setTargetToMachine(int machineIndex) {
-        if (machineIndex < 0 || machineIndex > 4) machineIndex = 0;
-        double targetY = MACHINE_Y_START + machineIndex * MACHINE_SPACING;
-        setTarget(MACHINE_X, targetY);
+        if (distance > 0) {
+            positionX += (dx / distance) * speed;
+            positionY += (dy / distance) * speed;
+        }
     }
 }

@@ -9,22 +9,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
-//store visual de empleados
 public class KitchenVisual extends MyCanvasE {
-    //coordenadas de los counters hardcodeado
-    private static final int COUNTER_X = 650;
-    private static final int COUNTER_Y_START = 100;
-    private static final int COUNTER_SPACING = 100;
-    private static final int COUNTER_COUNT = 5;
-    //coordenandas de las machines hardcodeado
-    private static final int MACHINE_X = 150;
-    private static final int MACHINE_Y_START = 100;
-    private static final int MACHINE_SPACING = 80;
-    private static final int MACHINE_COUNT = 5;
+
+    private final int COUNTER_COUNT;
+    private final int MACHINE_COUNT;
+
     private Image background;
 
-    public KitchenVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees) {
+    public int ventX, ventY;
+    public ArrayList<Point> counterPoints = new ArrayList<>();
+    public ArrayList<Point> machinePoints = new ArrayList<>();
+
+    public KitchenVisual(JTextArea tArea, Semaphore semaphore, ArrayList<Employee> employees, int COUNTER_COUNT, int MACHINE_COUNT) {
+
         super(tArea, semaphore, employees);
+        this.COUNTER_COUNT = COUNTER_COUNT;
+        this.MACHINE_COUNT = MACHINE_COUNT;
+
         try {
             background = ImageIO.read(new File("Images/restaurant.jpg"));
         } catch (IOException e) {
@@ -46,39 +47,83 @@ public class KitchenVisual extends MyCanvasE {
 
     @Override
     public void paint(Graphics g) {
+
+        int w = getWidth();
+        int h = getHeight();
         if (background != null) {
-            g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
+            g.drawImage(background, 0, 0, w, h, this);
         } else {
             g.setColor(Color.WHITE);
-            g.fillRect(0, 0, getWidth(), getHeight());
+            g.fillRect(0, 0, w, h);
         }
-        //dibuja los counters
+
+        counterPoints.clear();
+        machinePoints.clear();
+
+        int ventWidth = 120;
+        int ventHeight = 45;
+
+        ventX = (w / 2) - (ventWidth / 2);
+        ventY = 20;
+
+        g.setColor(new Color(160, 160, 160));
+        g.fillRect(ventX, ventY, ventWidth, ventHeight);
+
+        g.setColor(Color.BLACK);
+        g.drawString("VENTANILLA", ventX + 15, ventY - 5);
+
+        int counterWidth = 100;
+        int counterHeight = 40;
+
+        int espacioCounter = h / (COUNTER_COUNT + 1);
+        int counterX = (int)(w * 0.75);
+
         g.setColor(new Color(150, 75, 0));
+
         for (int i = 0; i < COUNTER_COUNT; i++) {
-            int y = COUNTER_Y_START + i * COUNTER_SPACING;
-            g.fillRect(COUNTER_X, y, 100, 40);
+            int y = espacioCounter * (i + 1);
+
+            g.fillRect(counterX, y, counterWidth, counterHeight);
+
             g.setColor(Color.BLACK);
-            g.drawString("Counter " + (i + 1), COUNTER_X + 10, y - 5);
+            g.drawString("Counter " + (i + 1), counterX + 10, y - 5);
+
+            counterPoints.add(new Point(counterX - 50, y + counterHeight / 2));
+
             g.setColor(new Color(150, 75, 0));
         }
 
-        //dibuja las maquinas mejor poner una imagen
+        int machineSize = 70;
+
+        int espacioMachine = h / (MACHINE_COUNT + 1);
+        int machineX = (int)(w * 0.20);
+
         g.setColor(Color.DARK_GRAY);
+
         for (int i = 0; i < MACHINE_COUNT; i++) {
-            int y = MACHINE_Y_START + i * MACHINE_SPACING;
-            g.fillRect(MACHINE_X, y, 70, 70);
+            int y = espacioMachine * (i + 1);
+
+            g.fillRect(machineX, y, machineSize, machineSize);
+
             g.setColor(Color.WHITE);
-            g.drawString("M. " + (i + 1), MACHINE_X + 20, y + 35);
+            g.drawString("M. " + (i + 1), machineX + 20, y + 35);
+
+            machinePoints.add(new Point(machineX + machineSize + 10, y + machineSize / 2));
+
             g.setColor(Color.DARK_GRAY);
         }
 
-        // dibuja los empleados
+        for (Employee employee : employees) {
+            employee.getMovement().setWindowPosition(ventX + ventWidth / 2, ventY + ventHeight + 20);
+            employee.getMovement().setCounterPoints(counterPoints);
+            employee.getMovement().setMachinePoints(machinePoints);
+        }
+
         for (Employee employee : employees) {
             int px = (int) employee.getX();
             int py = (int) employee.getY();
             BufferedImage sprite = employee.getCurrentSprite();
 
-            // estado debug
             g.setColor(Color.BLUE);
             g.drawString(employee.getEmployeeState().toString(), px - 10, py - 5);
 
@@ -88,6 +133,9 @@ public class KitchenVisual extends MyCanvasE {
                 g.setColor(Color.RED);
                 g.fillOval(px, py, 20, 20);
             }
+
+            g.setColor(Color.WHITE);
+            g.drawString(employee.getEmployeeName(), px - 10, py + 55);
         }
     }
 }
