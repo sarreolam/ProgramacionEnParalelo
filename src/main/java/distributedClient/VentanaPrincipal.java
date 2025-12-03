@@ -8,6 +8,7 @@ import Utils.StateTable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class VentanaPrincipal extends JFrame {
@@ -15,6 +16,7 @@ public class VentanaPrincipal extends JFrame {
     private final JTextField numSillas = new JTextField("5");
     private final JButton inicializarBtn = new JButton("Inicializar Simulación");
     private final JCheckBox mostrarAnimacionCheck = new JCheckBox("Mostrar Animación Visual", true);
+    ArrayList<Client> clientList = new ArrayList<>();
 
 
     public VentanaPrincipal() {
@@ -61,6 +63,14 @@ public class VentanaPrincipal extends JFrame {
         int numSillas1 = Integer.parseInt(numSillas.getText());
         boolean mostrarAnimacion = mostrarAnimacionCheck.isSelected();
 
+        CounterClient counterClient = new CounterClient(5);
+
+        Chair[] chairs = new Chair[numSillas1];
+        for (int i = 0; i < numSillas1; i++) {
+            chairs[i] = new Chair("Silla" + (i + 1), i);
+        }
+
+
         if (numClients <= 0 || numSillas1 < 0) {
             JOptionPane.showMessageDialog(this,
                     "Los valores deben ser mayores a 0",
@@ -72,20 +82,17 @@ public class VentanaPrincipal extends JFrame {
         inicializarBtn.setEnabled(false);
         inicializarBtn.setText("Simulación en curso...");
 
-        CounterClient counterClient = new CounterClient();
-
-        Chair[] chairs = new Chair[numSillas1];
-
         for (int i = 0; i < numSillas1; i++){
-            chairs[i] = new Chair("Silla"+ (i+1));
+            chairs[i] = new Chair("Silla"+ (i+1), i);
         }
 
         Store store = new Store(10, chairs);
         Client[] clientsArray = new Client[numClients];
 
         for (int i = 0; i < numClients; i++) {
-            Agents.Client client = new Client("Client" + (i + 1), counterClient, store);
+            Agents.Client client = new Client("Client" + (i + 1), counterClient, store, 5, 10.5);
             clientsArray[i] = client;
+            clientList.add(client);
             client.start();
 
             try {
@@ -101,12 +108,14 @@ public class VentanaPrincipal extends JFrame {
                 JTextArea textArea = new JTextArea();
                 Semaphore semaphore = new Semaphore(1);
 
+                ClientsVisual visual = new ClientsVisual(textArea, semaphore, clientList, 5, numSillas1);
+                visual.setSize(800, 600);
 
+                animationFrame.add(visual);
                 animationFrame.setSize(800, 600);
                 animationFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 animationFrame.setLocationRelativeTo(null);
                 animationFrame.setVisible(true);
-
             });
         }
 

@@ -5,48 +5,69 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CounterClient {
     private final int capacidadMaxima;
     private final Semaphore espaciosDisponibles;
     private final Object mutex = new Object();
-    private final Queue<String> colaClientes = new LinkedList<>();
 
-    private final Map<Integer, String> pedidosEnProceso = new HashMap<>();
-    private final Map<String, Boolean> pedidosListos = new HashMap<>();
+    private final int numberOfCounters;
+    private final AtomicInteger nextCounter = new AtomicInteger(0);
+    private final Map<String, Integer> clientToCounterMap = new HashMap<>();
 
-
-    public CounterClient() {
+    public CounterClient(int numberOfCounters) {
         this.capacidadMaxima = 5;
         this.espaciosDisponibles = new Semaphore(capacidadMaxima, true);
+        this.numberOfCounters = numberOfCounters;
+    }
+
+    public int assignCounter(String nombreCliente) {
+        synchronized (mutex) {
+            int assignedCounter = nextCounter.getAndUpdate(n -> (n + 1) % numberOfCounters);
+            clientToCounterMap.put(nombreCliente, assignedCounter);
+            System.out.println(nombreCliente + " asignado al counter " + assignedCounter);
+            return assignedCounter;
+        }
     }
 
     public void clienteLlega(String nombreCliente) {
-
         try {
             espaciosDisponibles.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         try (Socket socket = new Socket("localhost", 5000);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
+            out.println(nombreCliente);
             in.readLine();
 
-
-            in.close();
-            out.close();
-            socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             espaciosDisponibles.release();
+            synchronized (mutex) {
+                clientToCounterMap.remove(nombreCliente);
+            }
         }
     }
 
+    public Integer getClientCounter(String nombreCliente) {
+        synchronized (mutex) {
+            return clientToCounterMap.get(nombreCliente);
+        }
+    }
+
+    public int getClientsAtCounter(int counterIndex) {
+        synchronized (mutex) {
+            return (int) clientToCounterMap.values().stream()
+                    .filter(idx -> idx == counterIndex)
+                    .count();
+        }
+    }
 }
