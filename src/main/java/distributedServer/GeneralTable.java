@@ -134,7 +134,6 @@ public class GeneralTable extends JFrame implements Runnable {
 
             model.addRow(new Object[]{"Búfer", "Counter (clientes en fila)", parts[1]});
             model.addRow(new Object[]{"Búfer", "Kitchen (pedidos pendientes)", parts[2]});
-            model.addRow(new Object[]{"Búfer", "Store (clientes adentro)", parts[3]});
 
             model.addRow(new Object[]{"Zona crítica", "Máquinas en uso", parts[4]});
             model.addRow(new Object[]{"Zona crítica", "Máquinas averiadas", parts[5]});

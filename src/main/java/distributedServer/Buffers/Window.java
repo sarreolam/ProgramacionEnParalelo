@@ -1,5 +1,6 @@
 package Buffers;
 
+import Agents.DriveThru;
 import Utils.Pedido;
 
 import java.util.HashMap;
@@ -7,10 +8,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Window {
-    private final Semaphore espacioVentanilla;   // SOLO 1
+    private final Semaphore espacioVentanilla;   // SOLO 1 carro
     private final Semaphore carrosEsperando;     // pedidos listos para ser atendidos
+
+    // control de empleado atendiendo
+    private final AtomicBoolean empleadoAtendiendo = new AtomicBoolean(false);
 
     private final Object mutex = new Object();
     private final Queue<String> colaCarros = new LinkedList<>();
@@ -19,16 +24,20 @@ public class Window {
     private final Map<String, Boolean> pedidosListos = new HashMap<>();
     private int idPedido = 10000;
 
-
     public Window() {
         this.espacioVentanilla = new Semaphore(1, true);
         this.carrosEsperando = new Semaphore(0, true);
     }
-    public void carroLlega(String nombreCarro) {
+
+    public void carroLlega(String nombreCarro, DriveThru driveThru) {
         System.out.println(nombreCarro + " esta haciendo fila");
 
         try {
             espacioVentanilla.acquire(); // SOLO 1 cliente puede estar
+            driveThru.setState(DriveThru.DriveThruState.EN_VENTANILLA);
+            driveThru.getMovement().setTargetToVentanilla();
+            esperar(200);
+
             System.out.println(nombreCarro + " llega a la ventanilla...");
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -39,6 +48,8 @@ public class Window {
             System.out.println(nombreCarro + " está en ventanilla (fila: " + colaCarros.size() + ")");
         }
         carrosEsperando.release();
+
+        driveThru.setState(DriveThru.DriveThruState.ESPERANDO_ORDEN);
         boolean atendido = false;
         while (!atendido) {
             synchronized (mutex) {
@@ -51,7 +62,12 @@ public class Window {
         System.out.println(nombreCarro + " recibió su pedido y deja ventanilla.");
         espacioVentanilla.release();
     }
-
+    public boolean intentarAtender() {
+        return empleadoAtendiendo.compareAndSet(false, true);
+    }
+    public void liberarAtencion() {
+        empleadoAtendiendo.set(false);
+    }
 
     public int empleadoLlega(String name) {
         if (!carrosEsperando.tryAcquire()) {
@@ -74,6 +90,7 @@ public class Window {
 
         return pedidoId;
     }
+
     private int registrarPedido(String carro) {
         synchronized (mutex) {
             int pedidoIdDT = idPedido++;
@@ -93,6 +110,7 @@ public class Window {
             }
         }
     }
+
     public boolean hayCarrosEsperando() {
         return carrosEsperando.availablePermits() > 0;
     }
@@ -104,6 +122,7 @@ public class Window {
             System.out.println(e);
         }
     }
+
     public int getCarrosEnFila() {
         synchronized (mutex) {
             return colaCarros.size();

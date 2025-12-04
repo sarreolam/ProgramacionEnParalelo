@@ -1,16 +1,19 @@
 import Agents.Employee;
+import Agents.DriveThru;
 
 import java.awt.*;
 import java.util.ArrayList;
 
 public class PaintingAgentsE implements Runnable {
     private final ArrayList<Employee> employees;
+    private final ArrayList<DriveThru> driveThrus;
     private final Canvas canvas;
     private volatile boolean running = true;
 
-    public PaintingAgentsE(ArrayList<Employee> employees, Canvas canvas) {
+    public PaintingAgentsE(ArrayList<Employee> employees, ArrayList<DriveThru> driveThrus, Canvas canvas) {
         this.canvas = canvas;
         this.employees = employees;
+        this.driveThrus = driveThrus;
     }
 
     @Override
@@ -34,11 +37,14 @@ public class PaintingAgentsE implements Runnable {
             for (Employee employee : employees) {
                 employee.UpdateAnimation();
             }
+            for (DriveThru driveThru : driveThrus) {
+                driveThru.UpdateAnimation();
+            }
 
             canvas.update(g);
 
             try {
-                Thread.sleep(16);
+                Thread.sleep(16);  // ~60 FPS
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 running = false;

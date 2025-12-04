@@ -1,5 +1,6 @@
 package Buffers;
 
+import Agents.Employee;
 import Utils.Pedido;
 
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Counter {
     private final int capMaxCounter;
@@ -18,10 +20,20 @@ public class Counter {
     private final Map<String, Boolean> pedidosListos = new HashMap<>();
     private int idCounter = 0;
 
+    // Para distribuir empleados entre counters
+    private final AtomicInteger nextCounterIndex = new AtomicInteger(0);
+
+    // Para rastrear qué counters están ocupados
+    private final Map<Integer, Boolean> countersOcupados = new HashMap<>();
+
     public Counter(int capacidadMaxima) {
         this.capMaxCounter = capacidadMaxima;
         this.espaciosDisponibles = new Semaphore(capacidadMaxima, true);
         this.clientesEsperando = new Semaphore(0, true);
+
+        for (int i = 0; i < capacidadMaxima; i++) {
+            countersOcupados.put(i, false);
+        }
     }
 
     public void clienteLlega(String nombreCliente) {
@@ -30,9 +42,9 @@ public class Counter {
         try {
             espaciosDisponibles.acquire();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
         synchronized (mutex) {
             colaClientes.add(nombreCliente);
             System.out.println(nombreCliente + " está esperando en el counter. [Clientes en fila: " + colaClientes.size() + "]");
@@ -54,10 +66,13 @@ public class Counter {
         espaciosDisponibles.release();
     }
 
-    public int empleadoLlega(String nombreEmpleado) {
+    public int empleadoLlega(String nombreEmpleado, Employee employee) {
         if (!clientesEsperando.tryAcquire()) {
             return -1;
         }
+        employee.setState(Employee.EmployeeState.ATENDIENDO);
+        employee.UpdateAnimationArray();
+        esperar((int) (employee.getTiempoAtender() * 2000L));
         String cliente;
         synchronized (mutex) {
             cliente = colaClientes.poll();
@@ -97,6 +112,23 @@ public class Counter {
         return clientesEsperando.availablePermits() > 0;
     }
 
+    public int obtenerCounterLibre() {
+        if (capMaxCounter <= 0) {
+            return 0;
+        }
+
+        int index = nextCounterIndex.getAndIncrement() % capMaxCounter;
+        return index;
+    }
+
+    public int obtenerCounterParaEntrega() {
+        if (capMaxCounter <= 0) {
+            return 0;
+        }
+        int index = nextCounterIndex.getAndIncrement() % capMaxCounter;
+        return index;
+    }
+
     private void esperar(int t) {
         try {
             Thread.sleep(t);
@@ -111,5 +143,16 @@ public class Counter {
         }
     }
 
+    public void liberarCounter(int index) {
+        if (index >= 0 && index < capMaxCounter) {
+            synchronized (mutex) {
+                countersOcupados.put(index, false);
+                System.out.println("✓ Counter " + index + " liberado");
+            }
+        }
+    }
 
+    public int getCapMaxCounter(){
+        return capMaxCounter;
+    }
 }
