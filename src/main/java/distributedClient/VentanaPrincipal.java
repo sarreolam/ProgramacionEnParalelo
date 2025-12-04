@@ -22,6 +22,8 @@ public class VentanaPrincipal extends JFrame {
     private final JCheckBox mostrarAnimacionCheck = new JCheckBox("Mostrar Animación Visual", true);
     ArrayList<Client> clientList = new ArrayList<>();
 
+    SpinnerNumberModel numMaxClientes = new SpinnerNumberModel(10, 1, 100, 1);
+    JSpinner numMaxClientesSpinner = new JSpinner(numMaxClientes);
     SpinnerNumberModel orderProb = new SpinnerNumberModel(20, 1, 100, 1);
     JSpinner orderSpin = new JSpinner(orderProb);
     SpinnerNumberModel sitProb = new SpinnerNumberModel(20, 1, 100, 1);
@@ -40,7 +42,7 @@ public class VentanaPrincipal extends JFrame {
     JSpinner waitTimeSpin = new JSpinner(waitTime);
 
 
-    private int orderProbability, sitProbability, walkProbability, exitProbability, sitTimeWait, waitTimeWait, nothingProbability;
+    private int orderProbability, sitProbability, walkProbability, exitProbability, sitTimeWait, waitTimeWait, nothingProbability, maxClientNum;
 
     public VentanaPrincipal() {
         setTitle("Simulador McDonalds");
@@ -65,6 +67,7 @@ public class VentanaPrincipal extends JFrame {
 
         addRow(panelCentro, gbc, row++, "Número de Clientes:", numClientes);
         addRow(panelCentro, gbc, row++, "Número de sillas:", numSillas);
+        addRow(panelCentro, gbc, row++, "Numero maximo de clientes en la tienda:" , numMaxClientesSpinner);
         addRow(panelCentro, gbc, row++, "Probabilidad de ordenar:", orderSpin);
         addRow(panelCentro, gbc, row++, "Probabilidad de sentarse:", sitSpin);
         addRow(panelCentro, gbc, row++, "Probabilidad de caminar:", walkSpin);
@@ -102,6 +105,7 @@ public class VentanaPrincipal extends JFrame {
 
         orderProbability = (int)orderProb.getValue();
         sitProbability = (int)sitProb.getValue();
+        maxClientNum = (int)numMaxClientesSpinner.getValue();
         walkProbability = (int)walkProb.getValue();
         exitProbability = (int)exitProb.getValue();
         nothingProbability = (int)nothingProb.getValue();
@@ -132,7 +136,7 @@ public class VentanaPrincipal extends JFrame {
             chairs[i] = new Chair("Silla"+ (i+1), i);
         }
 
-        Store store = new Store(10, chairs);
+        Store store = new Store(maxClientNum, chairs);
         Client[] clientsArray = new Client[numClients];
 
         for (int i = 0; i < numClients; i++) {
