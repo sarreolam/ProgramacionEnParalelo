@@ -24,6 +24,14 @@ public class VentanaPrincipal extends JFrame {
     private final JTextField velMovimiento= new JTextField("3");
     private final JTextField capMaxCounter= new JTextField("5");
 
+    SpinnerNumberModel snm = new SpinnerNumberModel(
+            1,
+            1,
+            5,
+            1
+    );
+    JSpinner spnNumber = new JSpinner(snm);
+
 
 
 
@@ -57,7 +65,7 @@ public class VentanaPrincipal extends JFrame {
         panelCentro.add(new JLabel("Velocidad del empleado:"));
         panelCentro.add(velMovimiento);
         panelCentro.add(new JLabel("Capacidad Máxima del Counter:"));
-        panelCentro.add(capMaxCounter);
+        panelCentro.add(spnNumber);
 
 
 
@@ -91,7 +99,7 @@ public class VentanaPrincipal extends JFrame {
         int tiempoReparar = Integer.parseInt(tmpReparando.getText());
 
         int velocidadMovimiento = Integer.parseInt(velMovimiento.getText());
-        int capacidadMaximaCounter = Integer.parseInt(capMaxCounter.getText());
+        int capacidadMaximaCounter = (int)spnNumber.getValue();
 
         if (numEmployees <= 0 || numMachines <= 0 || drive <= 0) {
             JOptionPane.showMessageDialog(this,
