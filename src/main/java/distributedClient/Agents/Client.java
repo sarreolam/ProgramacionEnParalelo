@@ -67,7 +67,6 @@ public class Client extends Thread {
                 UpdateAnimationArray();
                 UpdateTargetByState();
                 System.out.println(name + " camina al counter " + assignedCounterIndex);
-                esperar(2000);
 
 
 

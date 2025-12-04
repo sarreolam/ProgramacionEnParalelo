@@ -8,6 +8,10 @@ import Utils.StateTable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
@@ -63,12 +67,7 @@ public class VentanaPrincipal extends JFrame {
         int numSillas1 = Integer.parseInt(numSillas.getText());
         boolean mostrarAnimacion = mostrarAnimacionCheck.isSelected();
 
-        CounterClient counterClient = new CounterClient(5);
 
-        Chair[] chairs = new Chair[numSillas1];
-        for (int i = 0; i < numSillas1; i++) {
-            chairs[i] = new Chair("Silla" + (i + 1), i);
-        }
 
 
         if (numClients <= 0 || numSillas1 < 0) {
@@ -78,6 +77,14 @@ public class VentanaPrincipal extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
+        int numberOfCounters = tryServerCounter();
+        CounterClient counterClient = new CounterClient(numberOfCounters);
+
+        Chair[] chairs = new Chair[numSillas1];
+        for (int i = 0; i < numSillas1; i++) {
+            chairs[i] = new Chair("Silla" + (i + 1), i);
+        }
+
 
         inicializarBtn.setEnabled(false);
         inicializarBtn.setText("Simulación en curso...");
@@ -96,7 +103,7 @@ public class VentanaPrincipal extends JFrame {
             client.start();
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -132,5 +139,21 @@ public class VentanaPrincipal extends JFrame {
         stateThread.start();
 
 
+    }
+    public int tryServerCounter(){
+        int maxClientes = 5;
+        try (Socket socket = new Socket("localhost", 5000);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            maxClientes = Integer.parseInt(in.readLine());
+
+            in.close();
+            out.close();
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return maxClientes;
     }
 }

@@ -1,5 +1,6 @@
 package Buffers;
 
+import Agents.Employee;
 import Utils.Pedido;
 
 import java.util.HashMap;
@@ -65,10 +66,13 @@ public class Counter {
         espaciosDisponibles.release();
     }
 
-    public int empleadoLlega(String nombreEmpleado) {
+    public int empleadoLlega(String nombreEmpleado, Employee employee) {
         if (!clientesEsperando.tryAcquire()) {
             return -1;
         }
+        employee.setState(Employee.EmployeeState.ATENDIENDO);
+        employee.UpdateAnimationArray();
+        esperar((int) (employee.getTiempoAtender() * 2000L));
         String cliente;
         synchronized (mutex) {
             cliente = colaClientes.poll();
@@ -146,5 +150,9 @@ public class Counter {
                 System.out.println("✓ Counter " + index + " liberado");
             }
         }
+    }
+
+    public int getCapMaxCounter(){
+        return capMaxCounter;
     }
 }
