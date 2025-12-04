@@ -5,6 +5,6 @@ public class Main {
         VentanaPrincipal ventana = new VentanaPrincipal();
 //        MainInfoWindow ventanaPrincipal = new MainInfoWindow(ventana);
 
-        //ventana.setVisible(true);
+        ventana.setVisible(true);
     }
 }

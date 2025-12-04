@@ -108,11 +108,7 @@ public class VentanaPrincipal extends JFrame {
         sitTimeWait = (int)sitTime.getValue();
         waitTimeWait = (int)waitTime.getValue();
         normalizeProbabilities();
-
-        CounterClient counterClient = new CounterClient(5);
-
-
-
+        
         if (numClients <= 0 || numSillas1 < 0) {
             JOptionPane.showMessageDialog(this,
                     "Los valores deben ser mayores a 0",
