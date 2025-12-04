@@ -47,7 +47,7 @@ public class Client extends Thread {
         this.state = ClientState.CAMINANDO_A_LA_TIENDA;
         this.tiempoComer = tiempoComer;
         this.velocidadMovimiento = velocidadMovimiento;
-        this.movement = new ClientMovement(400, 300, velocidadMovimiento);
+        this.movement = new ClientMovement(400, 300, 3); //ajuste de velocidad
 
         LoadSprites();
         UpdateAnimationArray();
@@ -69,12 +69,9 @@ public class Client extends Thread {
                 System.out.println(name + " camina al counter " + assignedCounterIndex);
                 esperar(2000);
 
-                state = ClientState.PIDIENDO;
-                UpdateAnimationArray();
-                UpdateTargetByState();
-                System.out.println(name + " esta pidiendo en counter " + assignedCounterIndex);
 
-                counterClient.clienteLlega(name);
+
+                counterClient.clienteLlega(name, this);
 
                 System.out.println(name + " se aleja del counter con su comida");
                 assignedCounterIndex = -1;
@@ -242,7 +239,7 @@ public class Client extends Thread {
         }
     }
 
-    private void UpdateTargetByState() {
+    public void UpdateTargetByState() {
         switch (state) {
 
             case CAMINANDO_A_LA_TIENDA:
@@ -299,4 +296,7 @@ public class Client extends Thread {
     public void setQueuePositionAtChair(int position) {
         this.queuePositionAtChair = position;
     }
+
+    public void setState(ClientState s){state = s; }
+    public String getClientName(){return name;}
 }

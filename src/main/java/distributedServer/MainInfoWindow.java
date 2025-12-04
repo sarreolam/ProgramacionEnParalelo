@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 public class MainInfoWindow extends JFrame {
     private JFrame frame = new JFrame("Programacion en paralelo - Parcial 3");
-    private ImageIcon image = new ImageIcon("C:\\Users\\marco\\IdeaProjects\\ProgramacionEnParalelo\\src\\main\\java\\distributedServer\\Images\\info.png");
+    private ImageIcon image = new ImageIcon("Images/info.png");
     private JLabel label = new JLabel(image, JLabel.CENTER);
     private JButton button = new JButton("Start simulation");
     private VentanaPrincipal ventanaPrincipal;

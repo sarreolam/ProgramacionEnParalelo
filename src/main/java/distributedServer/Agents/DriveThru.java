@@ -140,16 +140,12 @@ public class DriveThru extends Thread {
             state = DriveThruState.ESPERANDO_VENTANILLA;
             System.out.println(name + " esperando turno...");
 
-            window.carroLlega(name);;
+            window.carroLlega(name, this);;
 
-            state = DriveThruState.EN_VENTANILLA;
-            movement.setTargetToVentanilla();
             while (!movement.hasReachedTarget()) {
                 movement.moveTowardsTarget();
                 esperar(25);
             }
-
-            state = DriveThruState.ESPERANDO_ORDEN;
 
             state = DriveThruState.SALIENDO;
             movement.setTargetToSalida();
@@ -164,6 +160,11 @@ public class DriveThru extends Thread {
         } catch (Exception e) {
             System.out.println("Error en drive-thru: " + e);
         }
+    }
+
+    public void setState(DriveThruState s){
+        state = s;
+
     }
 
 
