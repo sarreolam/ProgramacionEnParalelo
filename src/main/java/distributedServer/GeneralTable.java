@@ -5,6 +5,7 @@ import Agents.Machine;
 import Buffers.Counter;
 import Buffers.Kitchen;
 import Buffers.Store;
+import Buffers.Window;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -23,15 +24,17 @@ public class GeneralTable extends JFrame implements Runnable {
     private DriveThru[] driveThrus;
     private Counter counter;
     private Kitchen kitchen;
+    private Window window;
 
 
     public GeneralTable(Employee[] employees, Machine[] machines, DriveThru[] driveThrus,
-                        Counter counter, Kitchen kitchen) {
+                        Counter counter, Kitchen kitchen, Window window) {
         this.employees = employees;
         this.machines = machines;
         this.driveThrus = driveThrus;
         this.counter = counter;
         this.kitchen = kitchen;
+        this.window = window;
 
 
         model = new DefaultTableModel(new String[]{"Tipo", "Nombre / Recurso", "Cantidad"}, 0);
@@ -72,7 +75,6 @@ public class GeneralTable extends JFrame implements Runnable {
 
         // --- Agentes ---
         model.addRow(new Object[]{"Agente", "Employees", employees.length});
-        model.addRow(new Object[]{"Agente", "Clients", clients.length});
         model.addRow(new Object[]{"Agente", "Machines", machines.length});
         model.addRow(new Object[]{"Agente", "DriveThru", driveThrus.length});
 
@@ -80,8 +82,9 @@ public class GeneralTable extends JFrame implements Runnable {
         int clientesEnCounter = counter.getClientesEnFila();
         int pedidosEnKitchen = kitchen.getPedidosPendientes();
 
-        model.addRow(new Object[]{"Búfer", "Counter (clientes en fila)", clientesEnCounter});
-        model.addRow(new Object[]{"Búfer", "Kitchen (pedidos pendientes)", pedidosEnKitchen});
+        model.addRow(new Object[]{"Búfer", "Counter clientes en fila (M)", clientesEnCounter});
+        model.addRow(new Object[]{"Búfer", "Kitcken empleados en cocina (E)", pedidosEnKitchen});
+
 
         // --- Zonas críticas (Máquinas) ---
         int maquinasUsadas = 0, maquinasAveriadas = 0;
@@ -94,6 +97,8 @@ public class GeneralTable extends JFrame implements Runnable {
 
         model.addRow(new Object[]{"Zona crítica", "Máquinas en uso", maquinasUsadas});
         model.addRow(new Object[]{"Zona crítica", "Máquinas averiadas", maquinasAveriadas});
+
+        model.addRow(new Object[]{"Zona crítica", "Ventanilla Ocupada", window.ventanillaOcupada()});
     }
 
     private void refreshCall() {
@@ -128,7 +133,6 @@ public class GeneralTable extends JFrame implements Runnable {
 
             model.setRowCount(0);
             model.addRow(new Object[]{"Agente", "Employees", employees.length});
-            model.addRow(new Object[]{"Agente", "Clientes", clients.length});
             model.addRow(new Object[]{"Agente", "Machines", parts[0]});
             model.addRow(new Object[]{"Agente", "DriveThru", driveThrus != null ? driveThrus.length : 0});
 
