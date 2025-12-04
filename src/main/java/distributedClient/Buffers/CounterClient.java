@@ -1,5 +1,7 @@
 package Buffers;
 
+import Agents.Client;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -33,9 +35,14 @@ public class CounterClient {
         }
     }
 
-    public void clienteLlega(String nombreCliente) {
+    public void clienteLlega(String nombreCliente, Client client) {
+
         try {
             espaciosDisponibles.acquire();
+            client.setState(Client.ClientState.PIDIENDO);
+            client.UpdateAnimationArray();
+            client.UpdateTargetByState();
+            System.out.println(client.getClientName() + " esta pidiendo en counter " + client.getAssignedCounterIndex());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

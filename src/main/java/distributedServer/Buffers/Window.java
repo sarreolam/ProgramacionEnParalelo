@@ -1,5 +1,6 @@
 package Buffers;
 
+import Agents.DriveThru;
 import Utils.Pedido;
 
 import java.util.HashMap;
@@ -28,11 +29,15 @@ public class Window {
         this.carrosEsperando = new Semaphore(0, true);
     }
 
-    public void carroLlega(String nombreCarro) {
+    public void carroLlega(String nombreCarro, DriveThru driveThru) {
         System.out.println(nombreCarro + " esta haciendo fila");
 
         try {
             espacioVentanilla.acquire(); // SOLO 1 cliente puede estar
+            driveThru.setState(DriveThru.DriveThruState.EN_VENTANILLA);
+            driveThru.getMovement().setTargetToVentanilla();
+            esperar(200);
+
             System.out.println(nombreCarro + " llega a la ventanilla...");
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -44,6 +49,7 @@ public class Window {
         }
         carrosEsperando.release();
 
+        driveThru.setState(DriveThru.DriveThruState.ESPERANDO_ORDEN);
         boolean atendido = false;
         while (!atendido) {
             synchronized (mutex) {
