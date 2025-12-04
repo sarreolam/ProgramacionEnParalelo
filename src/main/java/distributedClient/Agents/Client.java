@@ -111,7 +111,7 @@ public class Client extends Thread {
                 UpdateAnimationArray();
                 UpdateTargetByState();
                 esperar(waitTimeWait);
-            } else if (x < (cumulative += exitProbability)){
+            } else if (x < (cumulative += nothingProbability)){
                 state = ClientState.ESPERANDO;
                 UpdateAnimationArray();
                 UpdateTargetByState();

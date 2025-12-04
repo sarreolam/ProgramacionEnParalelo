@@ -66,7 +66,7 @@ public class Employee extends Thread {
         BufferedImage[] previousAnim = currentAnim;
 
         switch (state) {
-            case NACIENDO:
+            case ENTRA_A_LA_TIENDA:
             case ESPERANDO:
             case ATENDIENDO:
             case PREPARANDO:
@@ -300,7 +300,8 @@ public class Employee extends Thread {
     }
 
     public enum EmployeeState {
-        NACIENDO, CAMINANDO_AL_MOSTRADOR, CAMINANDO_A_VENTANILLA,
+        ENTRA_A_LA_TIENDA,
+        CAMINANDO_AL_MOSTRADOR, CAMINANDO_A_VENTANILLA,
         CAMINANDO_A_MAQUINA, ESPERANDO, ATENDIENDO, SALIENDO, FUERA, PREPARANDO
     }
 }

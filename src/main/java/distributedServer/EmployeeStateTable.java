@@ -59,7 +59,7 @@ public class EmployeeStateTable extends JFrame implements Runnable {
             if (e == null) continue;
             Employee.EmployeeState state = e.getEmployeeState(); // <- añadiremos este método en Employee
             switch (state) {
-                case NACIENDO -> naciendo++;
+                case ENTRA_A_LA_TIENDA -> naciendo++;
                 case CAMINANDO_AL_MOSTRADOR -> caminandoMostrador++;
                 case CAMINANDO_A_MAQUINA -> caminandoMaquina++;
                 case ESPERANDO -> esperando++;

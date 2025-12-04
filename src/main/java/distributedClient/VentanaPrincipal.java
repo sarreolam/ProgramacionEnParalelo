@@ -22,15 +22,15 @@ public class VentanaPrincipal extends JFrame {
     private final JCheckBox mostrarAnimacionCheck = new JCheckBox("Mostrar Animación Visual", true);
     ArrayList<Client> clientList = new ArrayList<>();
 
-    SpinnerNumberModel orderProb = new SpinnerNumberModel(1, 1, 100, 1);
+    SpinnerNumberModel orderProb = new SpinnerNumberModel(20, 1, 100, 1);
     JSpinner orderSpin = new JSpinner(orderProb);
-    SpinnerNumberModel sitProb = new SpinnerNumberModel(1, 1, 100, 1);
+    SpinnerNumberModel sitProb = new SpinnerNumberModel(20, 1, 100, 1);
     JSpinner sitSpin = new JSpinner(sitProb);
-    SpinnerNumberModel walkProb = new SpinnerNumberModel(1, 1, 100, 1);
+    SpinnerNumberModel walkProb = new SpinnerNumberModel(20, 1, 100, 1);
     JSpinner walkSpin = new JSpinner(walkProb);
-    SpinnerNumberModel exitProb = new SpinnerNumberModel(1, 1, 100, 1);
+    SpinnerNumberModel exitProb = new SpinnerNumberModel(20, 1, 100, 1);
     JSpinner exitSpin = new JSpinner(exitProb);
-    SpinnerNumberModel nothingProb = new SpinnerNumberModel(1, 1, 100, 1);
+    SpinnerNumberModel nothingProb = new SpinnerNumberModel(20, 1, 100, 1);
     JSpinner nothingSpin = new JSpinner(nothingProb);
 
 
