@@ -132,7 +132,6 @@ public class Employee extends Thread {
 
         while (isRunning) {
             try {
-                // ir a ventanilla solo un empleado a la vez
                 if (window.hayCarrosEsperando() && window.intentarAtender()) {
                     try {
                         state = EmployeeState.CAMINANDO_A_VENTANILLA;
@@ -140,10 +139,11 @@ public class Employee extends Thread {
                         movement.setTargetToWindow();
                         System.out.println(name + " va a la ventanilla a atender.");
 
-                        Thread.sleep(tiempoAtender * 1000L);
+                        esperarLlegada();
 
                         state = EmployeeState.ATENDIENDO;
                         UpdateAnimationArray();
+                        Thread.sleep(tiempoAtender * 1000L);
 
                         int pedidoId = window.empleadoLlega(name);
                         if (pedidoId != -1) {
@@ -153,9 +153,7 @@ public class Employee extends Thread {
                         window.liberarAtencion();
                     }
                 }
-                // si hay clientes en el counter
                 else if (counter.hayClientesEsperando()) {
-                    // trata de agarrar un counter libre
                     assignedCounterIndex = counter.obtenerCounterLibre();
 
                     if (assignedCounterIndex != -1) {
@@ -165,10 +163,11 @@ public class Employee extends Thread {
                             movement.setTargetToCounter(assignedCounterIndex);
                             System.out.println(name + " va al counter " + assignedCounterIndex + " a atender.");
 
-                            Thread.sleep(tiempoAtender * 2000L);
+                            esperarLlegada();
 
                             state = EmployeeState.ATENDIENDO;
                             UpdateAnimationArray();
+                            Thread.sleep(tiempoAtender * 2000L);
 
                             int pedidoId = counter.empleadoLlega(name);
                             if (pedidoId != -1) {
@@ -179,7 +178,6 @@ public class Employee extends Thread {
                             assignedCounterIndex = -1;
                         }
                     } else {
-                        // si todos los counters estan ocupados se va al area de espera
                         state = EmployeeState.ESPERANDO;
                         UpdateAnimationArray();
                         movement.setTargetToWaitingArea();
@@ -187,9 +185,7 @@ public class Employee extends Thread {
                         Thread.sleep(500);
                     }
                 }
-                // si hay pedidos a preparar
                 else if (kitchen.hayPedidosEnEspera()) {
-                    // checar si hay maquinas libres antes de ir a prepararlo
                     if (!kitchen.hayMaquinasDisponibles()) {
                         state = EmployeeState.ESPERANDO;
                         UpdateAnimationArray();
@@ -209,14 +205,15 @@ public class Employee extends Thread {
                             state = EmployeeState.CAMINANDO_A_MAQUINA;
                             UpdateAnimationArray();
                             movement.setTargetToMachine(assignedMachineIndex);
+                            System.out.println(name + " va a la máquina " + assignedMachineIndex);
 
-                            System.out.println(name + " prepara pedido #" + pedido.getId() + " usando " + maquina.getNombre());
+                            esperarLlegada();
 
                             state = EmployeeState.PREPARANDO;
                             UpdateAnimationArray();
+                            System.out.println(name + " prepara pedido #" + pedido.getId() + " usando " + maquina.getNombre());
                             maquina.preparar(name);
 
-                            // Entregar pedido según origen
                             if (pedido.getSource().equals("counter")) {
                                 assignedCounterIndex = counter.obtenerCounterParaEntrega();
 
@@ -225,34 +222,41 @@ public class Employee extends Thread {
                                         state = EmployeeState.CAMINANDO_AL_MOSTRADOR;
                                         UpdateAnimationArray();
                                         movement.setTargetToCounter(assignedCounterIndex);
+                                        System.out.println(name + " va al counter " + assignedCounterIndex + " a entregar");
 
-                                        Thread.sleep(tiempoAtender * 2000L);
+                                        esperarLlegada();
+
+                                        state = EmployeeState.ATENDIENDO;
+                                        UpdateAnimationArray();
+                                        Thread.sleep(tiempoAtender * 1000L);
                                         counter.entregarPedido(pedido, name);
                                     } finally {
                                         counter.liberarCounter(assignedCounterIndex);
                                     }
                                 } else {
-                                    // Counter ocupado, esperar
                                     state = EmployeeState.ESPERANDO;
                                     UpdateAnimationArray();
                                     movement.setTargetToWaitingArea();
                                     Thread.sleep(500);
                                 }
                             } else {
-                                // Entregar en ventanilla
                                 if (window.intentarAtender()) {
                                     try {
                                         state = EmployeeState.CAMINANDO_A_VENTANILLA;
                                         UpdateAnimationArray();
                                         movement.setTargetToWindow();
+                                        System.out.println(name + " va a ventanilla a entregar");
 
+                                        esperarLlegada();
+
+                                        state = EmployeeState.ATENDIENDO;
+                                        UpdateAnimationArray();
                                         Thread.sleep(tiempoAtender * 1000L);
                                         window.entregarPedido(pedido, name);
                                     } finally {
                                         window.liberarAtencion();
                                     }
                                 } else {
-                                    // Ventanilla ocupada, esperar
                                     state = EmployeeState.ESPERANDO;
                                     UpdateAnimationArray();
                                     movement.setTargetToWaitingArea();
@@ -268,7 +272,6 @@ public class Employee extends Thread {
                         }
                     }
                 }
-                // Sin trabajo
                 else {
                     state = EmployeeState.ESPERANDO;
                     UpdateAnimationArray();
@@ -282,6 +285,14 @@ public class Employee extends Thread {
                 System.out.println(name + " terminó su turno.");
             }
         }
+    }
+    private void esperarLlegada() throws InterruptedException {
+        // Dar tiempo para que la animación de movimiento sea visible
+        Thread.sleep(1000);
+
+        while (!movement.hasReachedTarget()) {
+             Thread.sleep(100);
+         }
     }
 
     public enum EmployeeState {
