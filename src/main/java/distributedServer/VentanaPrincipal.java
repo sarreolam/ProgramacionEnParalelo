@@ -22,18 +22,9 @@ public class VentanaPrincipal extends JFrame {
     private final JTextField tmpReparando = new JTextField("2");
 
     private final JTextField velMovimiento= new JTextField("3");
-    private final JTextField capMaxCounter= new JTextField("5");
 
-    SpinnerNumberModel snm = new SpinnerNumberModel(
-            1,
-            1,
-            5,
-            1
-    );
-    JSpinner spnNumber = new JSpinner(snm);
-
-
-
+    SpinnerNumberModel machineCount = new SpinnerNumberModel(1, 1, 5, 1);
+    JSpinner machineCountSpin = new JSpinner(machineCount);
 
     public VentanaPrincipal() {
         setTitle("Simulador McDonalds");
@@ -65,9 +56,7 @@ public class VentanaPrincipal extends JFrame {
         panelCentro.add(new JLabel("Velocidad del empleado:"));
         panelCentro.add(velMovimiento);
         panelCentro.add(new JLabel("Capacidad Máxima del Counter:"));
-        panelCentro.add(spnNumber);
-
-
+        panelCentro.add(machineCountSpin);
 
         add(panelCentro, BorderLayout.CENTER);
 
@@ -99,7 +88,7 @@ public class VentanaPrincipal extends JFrame {
         int tiempoReparar = Integer.parseInt(tmpReparando.getText());
 
         int velocidadMovimiento = Integer.parseInt(velMovimiento.getText());
-        int capacidadMaximaCounter = (int)spnNumber.getValue();
+        int capacidadMaximaCounter = (int)machineCount.getValue();
 
         if (numEmployees <= 0 || numMachines <= 0 || drive <= 0) {
             JOptionPane.showMessageDialog(this,
