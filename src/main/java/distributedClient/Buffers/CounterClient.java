@@ -16,7 +16,7 @@ public class CounterClient {
     private final Semaphore espaciosDisponibles;
     private final Object mutex = new Object();
 
-    private final int numberOfCounters;
+    public final int numberOfCounters;
     private final AtomicInteger nextCounter = new AtomicInteger(0);
     private final Map<String, Integer> clientToCounterMap = new HashMap<>();
 

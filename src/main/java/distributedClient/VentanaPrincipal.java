@@ -162,7 +162,7 @@ public class VentanaPrincipal extends JFrame {
                 JTextArea textArea = new JTextArea();
                 Semaphore semaphore = new Semaphore(1);
 
-                ClientsVisual visual = new ClientsVisual(textArea, semaphore, clientList, 5, numSillas1);
+                ClientsVisual visual = new ClientsVisual(textArea, semaphore, clientList, counterClient.numberOfCounters, numSillas1);
                 visual.setSize(800, 600);
 
                 animationFrame.add(visual);
