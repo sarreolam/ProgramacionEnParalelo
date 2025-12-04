@@ -146,7 +146,7 @@ public class Window {
         }
     }
     public int ventanillaOcupada() {
-        if (espacioVentanilla.availablePermits()==0){
+        if (ventanillaOcupada){
             return 1;
         }
         return 0;
