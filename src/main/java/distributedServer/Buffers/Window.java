@@ -11,10 +11,13 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Window {
-    private final Semaphore espacioVentanilla;   // SOLO 1 carro
-    private final Semaphore carrosEsperando;     // pedidos listos para ser atendidos
+    // MONITOR for ventanilla (replaced semaphore)
+    private final Object ventanillaLock = new Object();
+    private boolean ventanillaOcupada = false;
 
-    // control de empleado atendiendo
+    // Keep this as semaphore
+    private final Semaphore carrosEsperando;
+
     private final AtomicBoolean empleadoAtendiendo = new AtomicBoolean(false);
 
     private final Object mutex = new Object();
@@ -25,31 +28,38 @@ public class Window {
     private int idPedido = 10000;
 
     public Window() {
-        this.espacioVentanilla = new Semaphore(1, true);
         this.carrosEsperando = new Semaphore(0, true);
     }
 
     public void carroLlega(String nombreCarro, DriveThru driveThru) {
         System.out.println(nombreCarro + " esta haciendo fila");
 
-        try {
-            espacioVentanilla.acquire(); // SOLO 1 cliente puede estar
-            driveThru.setState(DriveThru.DriveThruState.EN_VENTANILLA);
-            driveThru.getMovement().setTargetToVentanilla();
-            esperar(200);
-
-            System.out.println(nombreCarro + " llega a la ventanilla...");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        synchronized (ventanillaLock) {
+            while (ventanillaOcupada) {
+                try {
+                    ventanillaLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            ventanillaOcupada = true;
         }
+
+        driveThru.setState(DriveThru.DriveThruState.EN_VENTANILLA);
+        driveThru.getMovement().setTargetToVentanilla();
+        esperar(200);
+
+        System.out.println(nombreCarro + " llega a la ventanilla...");
 
         synchronized (mutex) {
             colaCarros.add(nombreCarro);
             System.out.println(nombreCarro + " está en ventanilla (fila: " + colaCarros.size() + ")");
         }
+
         carrosEsperando.release();
 
         driveThru.setState(DriveThru.DriveThruState.ESPERANDO_ORDEN);
+
         boolean atendido = false;
         while (!atendido) {
             synchronized (mutex) {
@@ -59,12 +69,19 @@ public class Window {
             }
             esperar(200);
         }
+
         System.out.println(nombreCarro + " recibió su pedido y deja ventanilla.");
-        espacioVentanilla.release();
+
+        synchronized (ventanillaLock) {
+            ventanillaOcupada = false;
+            ventanillaLock.notify();
+        }
     }
+
     public boolean intentarAtender() {
         return empleadoAtendiendo.compareAndSet(false, true);
     }
+
     public void liberarAtencion() {
         empleadoAtendiendo.set(false);
     }
