@@ -14,13 +14,13 @@ El sistema está dividido en dos partes principales:
 Dentro de la carpeta **distributedServer**, usa los siguientes comandos:
 
 - javac Main.java
-- java Main bash 
+- java Main
 
 ### 2. Ejecutar los clientes
 Dentro de la carpeta **distributedClient**, usa los siguientes comandos:
 
 - javac Main.java
-- java Main bash
+- java Main
 
 ## Integrantes
 - Santiago Arreola
