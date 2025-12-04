@@ -22,6 +22,25 @@ public class VentanaPrincipal extends JFrame {
     private final JCheckBox mostrarAnimacionCheck = new JCheckBox("Mostrar Animación Visual", true);
     ArrayList<Client> clientList = new ArrayList<>();
 
+    SpinnerNumberModel orderProb = new SpinnerNumberModel(1, 1, 100, 1);
+    JSpinner orderSpin = new JSpinner(orderProb);
+    SpinnerNumberModel sitProb = new SpinnerNumberModel(1, 1, 100, 1);
+    JSpinner sitSpin = new JSpinner(sitProb);
+    SpinnerNumberModel walkProb = new SpinnerNumberModel(1, 1, 100, 1);
+    JSpinner walkSpin = new JSpinner(walkProb);
+    SpinnerNumberModel exitProb = new SpinnerNumberModel(1, 1, 100, 1);
+    JSpinner exitSpin = new JSpinner(exitProb);
+    SpinnerNumberModel nothingProb = new SpinnerNumberModel(1, 1, 100, 1);
+    JSpinner nothingSpin = new JSpinner(nothingProb);
+
+
+    SpinnerNumberModel sitTime = new SpinnerNumberModel(1, 1, 10, 1);
+    JSpinner sitTimeSpin = new JSpinner(sitTime);
+    SpinnerNumberModel waitTime = new SpinnerNumberModel(1, 1, 10, 1);
+    JSpinner waitTimeSpin = new JSpinner(waitTime);
+
+
+    private int orderProbability, sitProbability, walkProbability, exitProbability, sitTimeWait, waitTimeWait, nothingProbability;
 
     public VentanaPrincipal() {
         setTitle("Simulador McDonalds");
@@ -33,14 +52,27 @@ public class VentanaPrincipal extends JFrame {
         tituloLabel.setFont(new Font("Arial", Font.BOLD, 18));
         add(tituloLabel, BorderLayout.NORTH);
 
-        JPanel panelCentro = new JPanel(new GridLayout(4, 2, 5, 5));
+        JPanel panelCentro = new JPanel();
         panelCentro.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
+        panelCentro.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
 
-        panelCentro.add(new JLabel("Número de Clientes:"));
-        panelCentro.add(numClientes);
-        panelCentro.add(new JLabel("Número de sillas:"));
-        panelCentro.add(numSillas);
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        int row = 0;
+
+        addRow(panelCentro, gbc, row++, "Número de Clientes:", numClientes);
+        addRow(panelCentro, gbc, row++, "Número de sillas:", numSillas);
+        addRow(panelCentro, gbc, row++, "Probabilidad de ordenar:", orderSpin);
+        addRow(panelCentro, gbc, row++, "Probabilidad de sentarse:", sitSpin);
+        addRow(panelCentro, gbc, row++, "Probabilidad de caminar:", walkSpin);
+        addRow(panelCentro, gbc, row++, "Probabilidad de salir:", exitSpin);
+        addRow(panelCentro, gbc, row++, "Probabilidad de no hacer nada:", nothingSpin);
+        addRow(panelCentro, gbc, row++, "Tiempo de sentarse:", sitTimeSpin);
+        addRow(panelCentro, gbc, row++, "Tiempo de espera general:", waitTimeSpin);
+        panelCentro.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
 
         add(panelCentro, BorderLayout.CENTER);
 
@@ -68,8 +100,15 @@ public class VentanaPrincipal extends JFrame {
         boolean mostrarAnimacion = mostrarAnimacionCheck.isSelected();
 
 
-
-
+        orderProbability = (int)orderProb.getValue();
+        sitProbability = (int)sitProb.getValue();
+        walkProbability = (int)walkProb.getValue();
+        exitProbability = (int)exitProb.getValue();
+        nothingProbability = (int)nothingProb.getValue();
+        sitTimeWait = (int)sitTime.getValue();
+        waitTimeWait = (int)waitTime.getValue();
+        normalizeProbabilities();
+        
         if (numClients <= 0 || numSillas1 < 0) {
             JOptionPane.showMessageDialog(this,
                     "Los valores deben ser mayores a 0",
@@ -97,7 +136,11 @@ public class VentanaPrincipal extends JFrame {
         Client[] clientsArray = new Client[numClients];
 
         for (int i = 0; i < numClients; i++) {
-            Agents.Client client = new Client("Client" + (i + 1), counterClient, store, 5, 10.5);
+            Agents.Client client = new Client("Client" + (i + 1), counterClient, store, 5, 10.5, orderProbability,
+                    sitProbability,
+                    walkProbability,
+                    exitProbability,
+                    nothingProbability, sitTimeWait, waitTimeWait);
             clientsArray[i] = client;
             clientList.add(client);
             client.start();
@@ -139,6 +182,29 @@ public class VentanaPrincipal extends JFrame {
         stateThread.start();
 
 
+    }
+    private void normalizeProbabilities() {
+        int sum = orderProbability + sitProbability + walkProbability +
+                exitProbability + nothingProbability;
+
+        if (sum == 0) return; // avoid division by zero
+
+        orderProbability    = (orderProbability    * 100) / sum;
+        sitProbability      = (sitProbability      * 100) / sum;
+        walkProbability     = (walkProbability     * 100) / sum;
+        exitProbability     = (exitProbability     * 100) / sum;
+        nothingProbability  = (nothingProbability  * 100) / sum;
+    }
+
+    private void addRow(JPanel panel, GridBagConstraints gbc, int row, String text, JComponent comp) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0.3;
+        panel.add(new JLabel(text), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        panel.add(comp, gbc);
     }
     public int tryServerCounter(){
         int maxClientes = 5;

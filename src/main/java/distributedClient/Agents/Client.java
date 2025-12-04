@@ -39,8 +39,9 @@ public class Client extends Thread {
     private int assignedCounterIndex = -1;
     private int assignedChairIndex = -1;
 
+    private int orderProbability, sitProbability, walkProbability, exitProbability,nothingProbability, sitTimeWait, waitTimeWait;
 
-    public Client(String name, CounterClient counterClient, Store store, int tiempoComer, double velocidadMovimiento) {
+    public Client(String name, CounterClient counterClient, Store store, int tiempoComer, double velocidadMovimiento, int orderP, int sitP, int walkP, int exitP, int nothingP, int sitTimeWait, int waitTimeWait) {
         this.name = name;
         this.counterClient = counterClient;
         this.store = store;
@@ -48,7 +49,13 @@ public class Client extends Thread {
         this.tiempoComer = tiempoComer;
         this.velocidadMovimiento = velocidadMovimiento;
         this.movement = new ClientMovement(400, 300, 3); //ajuste de velocidad
-
+        this.orderProbability = orderP;
+        this.sitProbability = sitP;
+        this.walkProbability = walkP;
+        this.exitProbability = exitP;
+        this.nothingProbability = nothingP;
+        this.sitTimeWait = sitTimeWait * 1000;
+        this.waitTimeWait = waitTimeWait * 1000;
         LoadSprites();
         UpdateAnimationArray();
     }
@@ -56,9 +63,9 @@ public class Client extends Thread {
     public void run() {
         store.entrarTienda(name);
         while(isRunning){
-            Random r = new Random();
-            int x = r.nextInt(100);
-            if (x < 40) {
+            int x = new Random().nextInt(100);
+            int cumulative = 0;
+            if (x < (cumulative += orderProbability)) {
                 // Assign counter and record arrival time
                 assignedCounterIndex = counterClient.assignCounter(name);
                 counterArrivalTime = System.currentTimeMillis(); // Record when joined queue
@@ -67,6 +74,7 @@ public class Client extends Thread {
                 UpdateAnimationArray();
                 UpdateTargetByState();
                 System.out.println(name + " camina al counter " + assignedCounterIndex);
+                esperar(waitTimeWait);
 
 
 
@@ -76,7 +84,7 @@ public class Client extends Thread {
                 assignedCounterIndex = -1;
                 counterArrivalTime = -1; // Reset
 
-            } else if (x < 60) {
+            } else if (x < (cumulative += sitProbability)) {
                 Chair chair = store.obtenerSillaLibre();
                 if (chair != null){
                     System.out.println(name + " se fue a sentar en "+ chair.getNombre());
@@ -86,35 +94,35 @@ public class Client extends Thread {
                     state = ClientState.CAMINANDO_A_ASIENTOS;
                     UpdateAnimationArray();
                     UpdateTargetByState();
-                    esperar(1000);
+                    esperar(sitTimeWait);
 
                     state = ClientState.SENTADO;
                     UpdateAnimationArray();
                     UpdateTargetByState();
-                    esperar(10000);
+                    esperar(sitTimeWait);
 
                     chair.liberar();
                     assignedChairIndex = -1;
                     chairArrivalTime = -1; // Reset
                 }
-            } else if (x < 70) {
+            } else if (x < (cumulative += walkProbability)) {
                 System.out.println(name + " camina porque quizo");
                 state = ClientState.CAMINANDO;
                 UpdateAnimationArray();
                 UpdateTargetByState();
-                esperar(2000);
-            } else if (x < 85){
+                esperar(waitTimeWait);
+            } else if (x < (cumulative += exitProbability)){
                 state = ClientState.ESPERANDO;
                 UpdateAnimationArray();
                 UpdateTargetByState();
                 System.out.println(name + " No hace nada");
-                esperar(2000);
+                esperar(waitTimeWait);
             } else {
                 state = ClientState.SALIENDO;
                 UpdateAnimationArray();
                 UpdateTargetByState();
                 isRunning = false;
-                esperar(1000);
+                esperar(waitTimeWait);
                 store.salirTienda(name);
             }
             state = ClientState.ESPERANDO;
@@ -298,4 +306,5 @@ public class Client extends Thread {
 
     public void setState(ClientState s){state = s; }
     public String getClientName(){return name;}
+
 }
