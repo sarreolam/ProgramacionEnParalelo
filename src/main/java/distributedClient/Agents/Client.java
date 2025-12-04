@@ -47,7 +47,7 @@ public class Client extends Thread {
         this.state = ClientState.CAMINANDO_A_LA_TIENDA;
         this.tiempoComer = tiempoComer;
         this.velocidadMovimiento = velocidadMovimiento;
-        this.movement = new ClientMovement(400, 300, velocidadMovimiento);
+        this.movement = new ClientMovement(400, 300, 3); //ajuste de velocidad
 
         LoadSprites();
         UpdateAnimationArray();
