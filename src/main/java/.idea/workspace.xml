@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4817870e-3ab6-425b-8246-697a4edb78f6" name="Changes" comment="" />
+    <list default="true" id="4817870e-3ab6-425b-8246-697a4edb78f6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Images/info.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/distributedServer/MainInfoWindow.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../out/production/ProgramacionEnParalelo/StateTable$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../out/production/ProgramacionEnParalelo/StateTable.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../out/production/ProgramacionEnParalelo/VentanaPrincipal.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/distributedClient/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/distributedClient/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/distributedServer/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/distributedServer/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/distributedServer/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/distributedServer/Main.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -10,9 +19,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "MarcoManjarrez"
+  }
 }]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/sarreolam/ProgramacionEnParalelo.git",
+    "accountId": "ccfd5c10-0b62-43cb-afaf-83364b7c1394"
+  }
+}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="36GAhqWw8k6YWy3kOtPMhHxZjgX" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -23,11 +44,22 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Avance3",
+    "git-widget-placeholder": "mainInfoWindow",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Ana M/Documents/Paralelo/ProgramacionEnParalelo/src/main/java"
+    "last_opened_file_path": "C:/Users/marco/IdeaProjects/ProgramacionEnParalelo/src/main",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="4817870e-3ab6-425b-8246-697a4edb78f6" name="Changes" comment="" />
@@ -35,7 +67,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1764622656737</updated>
+      <workItem from="1764646521033" duration="18000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
