@@ -145,4 +145,10 @@ public class Window {
             return colaCarros.size();
         }
     }
+    public int ventanillaOcupada() {
+        if (espacioVentanilla.availablePermits()==0){
+            return 1;
+        }
+        return 0;
+    }
 }

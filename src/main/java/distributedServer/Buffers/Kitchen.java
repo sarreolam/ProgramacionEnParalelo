@@ -18,6 +18,7 @@ public class Kitchen {
     private final Machine[] machines;
     private final int nextOrderId = 0;
 
+
     public Kitchen(Machine[] machines) {
         this.empleadosDentro = new Semaphore(5, true);
         this.machines = machines;
@@ -114,4 +115,10 @@ public class Kitchen {
     public synchronized int getPedidosPendientes() {
         return pedidosPendientes.size();
     }
+
+
+    public int getEmpleadosDentro() {
+        return 5 - empleadosDentro.availablePermits();
+    }
+
 }

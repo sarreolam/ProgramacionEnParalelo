@@ -154,7 +154,7 @@ public class VentanaPrincipal extends JFrame {
             });
         }
 
-        GeneralTable generalTable = new GeneralTable(employeesArray, machines, driveThrusArray, counter, kitchen);
+        GeneralTable generalTable = new GeneralTable(employeesArray, machines, driveThrusArray, counter, kitchen, window);
         Thread generalThread = new Thread(generalTable);
         generalThread.start();
 

@@ -74,10 +74,10 @@ public class GeneralTable extends JFrame implements Runnable {
         model.addRow(new Object[]{"Agentes", "Clientes sentados", clientesSentados});
 
 
-        model.addRow(new Object[]{"Store", "Clientes dentro", store.getClientesDentro()});
+        model.addRow(new Object[]{"Búfer", "Clientes dentro de Store (C)", store.getClientesDentro()});
 
-        model.addRow(new Object[]{"Sillas", "Ocupadas", clientesSentados});
-        model.addRow(new Object[]{"Sillas", "Libres", chairs - clientesSentados});
+        model.addRow(new Object[]{"Zona crítica", "Sillas Ocupadas (B)", clientesSentados});
+        model.addRow(new Object[]{"Zona crítica", "Sillas Libres (B)", chairs - clientesSentados});
     }
 
     private void refreshCall() {
