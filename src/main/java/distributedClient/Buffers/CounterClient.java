@@ -21,7 +21,7 @@ public class CounterClient {
     private final Map<String, Integer> clientToCounterMap = new HashMap<>();
 
     public CounterClient(int numberOfCounters) {
-        this.capacidadMaxima = 5;
+        this.capacidadMaxima = numberOfCounters;
         this.espaciosDisponibles = new Semaphore(capacidadMaxima, true);
         this.numberOfCounters = numberOfCounters;
     }

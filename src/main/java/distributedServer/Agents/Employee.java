@@ -165,11 +165,9 @@ public class Employee extends Thread {
 
                             esperarLlegada();
 
-                            state = EmployeeState.ATENDIENDO;
-                            UpdateAnimationArray();
-                            Thread.sleep(tiempoAtender * 2000L);
 
-                            int pedidoId = counter.empleadoLlega(name);
+
+                            int pedidoId = counter.empleadoLlega(name, this);
                             if (pedidoId != -1) {
                                 kitchen.agregarPedido(pedidoId, "counter");
                             }
@@ -293,6 +291,12 @@ public class Employee extends Thread {
         while (!movement.hasReachedTarget()) {
              Thread.sleep(100);
          }
+    }
+    public void setState(EmployeeState s){
+        state = s;
+    }
+    public int getTiempoAtender(){
+        return tiempoAtender;
     }
 
     public enum EmployeeState {

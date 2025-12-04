@@ -13,8 +13,10 @@ public class Store {
     private final Semaphore empleadosDentro;
     private final int nextOrderId = 0;
     private final Chair[] chairs;
+    private final int capacidadMaxima;
 
     public Store(int numClients, Chair[] chairs) {
+        this.capacidadMaxima = numClients;
         this.empleadosDentro = new Semaphore(numClients, true);
         this.chairs = chairs;
     }
@@ -42,5 +44,11 @@ public class Store {
         }
         System.out.println("No hay maquinas disponibles");
         return null;
+    }
+    public int getChairsNum(){
+        return chairs.length;
+    }
+    public int getClientesDentro() {
+        return capacidadMaxima - empleadosDentro.availablePermits();
     }
 }
