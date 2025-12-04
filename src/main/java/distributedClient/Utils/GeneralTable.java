@@ -1,6 +1,7 @@
 package Utils;
 
 import Agents.Client;
+import Buffers.Store;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,10 +15,14 @@ import java.net.Socket;
 public class GeneralTable extends JFrame implements Runnable {
     private final DefaultTableModel model;
     private final Client[] clients;
+    private final Store store;
+    private final int chairs;
 //    private Store store;
 
-    public GeneralTable(Client[] clients) {
+    public GeneralTable(Client[] clients, Store store) {
         this.clients = clients;
+        this.store = store;
+        this.chairs = store.getChairsNum();
 
         model = new DefaultTableModel(new String[]{"Tipo", "Nombre / Recurso", "Cantidad"}, 0);
     }
@@ -49,17 +54,30 @@ public class GeneralTable extends JFrame implements Runnable {
     private void refresh() {
         model.setRowCount(0);
 
-        // --- Agentes ---
-        model.addRow(new Object[]{"Agente", "Clients", clients.length});
-        // --- Buffers ---
+        int clientesPidiendo = 0;
+        int clientesSentados = 0;
 
-        // int clientesEnCounter = counter.getClientesEnFila();
-//        int clientesEnStore = store.getClientesDentro();
+        // --- CONTAR ESTADOS DE CLIENTES ---
+        for (Client c : clients) {
+            if (c == null) continue;
 
-        // model.addRow(new Object[]{"Búfer", "Counter (clientes en fila)", clientesEnCounter});
-//        model.addRow(new Object[]{"Búfer", "Store (clientes adentro)", clientesEnStore});
+            switch (c.getClientState()) {
+                case PIDIENDO -> clientesPidiendo++;
+                case SENTADO -> clientesSentados++;
 
-        // --- Zonas críticas (Máquinas) --
+            }
+        }
+
+        model.addRow(new Object[]{"Agentes", "Total clientes", clients.length});
+
+        model.addRow(new Object[]{"Agentes", "Clientes pidiendo", clientesPidiendo});
+        model.addRow(new Object[]{"Agentes", "Clientes sentados", clientesSentados});
+
+
+        model.addRow(new Object[]{"Store", "Clientes dentro", store.getClientesDentro()});
+
+        model.addRow(new Object[]{"Sillas", "Ocupadas", clientesSentados});
+        model.addRow(new Object[]{"Sillas", "Libres", chairs - clientesSentados});
     }
 
     private void refreshCall() {

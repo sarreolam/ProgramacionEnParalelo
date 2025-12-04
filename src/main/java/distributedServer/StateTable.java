@@ -9,7 +9,6 @@ import java.awt.*;
 
 public class StateTable extends JFrame implements Runnable {
     private final DefaultTableModel model;
-    private ClientInServer[] clientsList = new ClientInServer[0];
     private final Employee[] employeeList;
     private final Machine[] machineList;
     private final DriveThru[] driveThruList;
@@ -63,14 +62,6 @@ public class StateTable extends JFrame implements Runnable {
 
     private void refresh() {
         model.setRowCount(0); // Limpia las filas antes de actualizar
-
-        // Clientes
-        int[] clientStates = countThreadStates(clientsList);
-        model.addRow(new Object[]{
-                "Clients",
-                clientStates[0], clientStates[1], clientStates[2],
-                clientStates[3], clientStates[4], clientStates[5]
-        });
 
         // Empleados
         int[] employeeStates = countThreadStates(employeeList);

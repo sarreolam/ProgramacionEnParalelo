@@ -30,7 +30,6 @@ public class DriveThru extends Thread {
         ESPERANDO_VENTANILLA,
         EN_VENTANILLA,
         ESPERANDO_ORDEN,
-        RECIBIENDO_ORDEN,
         SALIENDO,
         FUERA
     }
@@ -74,7 +73,6 @@ public class DriveThru extends Thread {
             case ESPERANDO_VENTANILLA:
             case EN_VENTANILLA:
             case ESPERANDO_ORDEN:
-            case RECIBIENDO_ORDEN:
                 currentAnim = waitingAnim;
                 break;
             case FUERA:
@@ -174,5 +172,8 @@ public class DriveThru extends Thread {
         } catch (InterruptedException e) {
             System.out.println(e);
         }
+    }
+    public DriveThruState getDTState() {
+        return state;
     }
 }

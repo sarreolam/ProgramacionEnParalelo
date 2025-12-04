@@ -176,5 +176,13 @@ public class VentanaPrincipal extends JFrame {
         EmployeeStateTable employeeStateTable = new EmployeeStateTable(employeesArray);
         Thread employeeStateThread = new Thread(employeeStateTable);
         employeeStateThread.start();
+
+        DriveThruStateTable driveThruStateTable = new DriveThruStateTable(driveThrusArray);
+        Thread driveThruStateThread = new Thread(driveThruStateTable);
+        driveThruStateThread.start();
+
+        MachineStateTable machineStateTable = new MachineStateTable(machines);
+        Thread machineStateThread = new Thread(machineStateTable);
+        machineStateThread.start();
     }
 }
