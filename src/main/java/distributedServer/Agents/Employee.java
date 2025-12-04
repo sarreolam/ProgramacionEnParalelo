@@ -39,7 +39,7 @@ public class Employee extends Thread {
         this.window = window;
         this.tiempoAtender = tiempoAtender;
         this.velocidadMovimiento = velocidadMovimiento;
-        this.state = EmployeeState.FUERA;
+        this.state = EmployeeState.ENTRA_A_LA_TIENDA;
         this.movement = new EmployeeMovement(400, 300, velocidadMovimiento);
         LoadSprites();
         UpdateAnimationArray();
@@ -127,7 +127,7 @@ public class Employee extends Thread {
     @Override
     public void run() {
         System.out.println(name + " ha comenzado su turno.");
-        state = EmployeeState.FUERA;
+        state = EmployeeState.ESPERANDO;
         kitchen.entrarCocina(name);
 
         while (isRunning) {
