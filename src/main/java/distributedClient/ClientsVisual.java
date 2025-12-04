@@ -58,7 +58,7 @@ public class ClientsVisual extends MyCanvasE {
         try {
             background = ImageIO.read(new File("Images/background.jpg"));
             counterImg = ImageIO.read(new File("Images/counter.png"));
-            chairImage = ImageIO.read(new File("C:\\Users\\marco\\IdeaProjects\\ProgramacionEnParalelo\\src\\main\\java\\distributedClient\\Images\\chair.jpg"));
+            chairImage = ImageIO.read(new File("Images/chair.jpg"));
         } catch (IOException e) {
             System.out.println("No se pudo cargar la imagen: " + e.getMessage());
         }
